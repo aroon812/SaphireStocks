@@ -6,7 +6,8 @@ def layerWeightPartials(weights, inputVals, outputDerivatives):
     rows = len(weights)
     cols = len(weights[0])
     weightPartials = np.zeros((rows,cols))
-    
+    print(inputVals)
+    print(outputDerivatives)
     for i in range(rows):
         for j in range(cols):
             weightPartials[i][j]  = inputVals[i] * outputDerivatives[j]
@@ -24,12 +25,12 @@ def nodeDerivatives(node_values, output_weights, activation_derivative, output_d
     return nodeParitals
 
 #determines the change of weights for a specific calculation
-def gdBackprop(weights, pre_nodeValues, post_nodeValues, activation_derivative, cost_derivative, learnRate,pre_output ,output, errorDeriv):
+def gdBackprop(weights, pre_nodeValues, post_nodeValues, activation_derivative, cost_derivative, learnRate,pre_output ,output, errorDeriv, target):
     numLayers = len(weights)
     deltaWeights = [None]*numLayers
 
     #calculates derivative for final output 
-    tempPartials = [cost_derivative(pre_output) * errorDeriv(output)]
+    tempPartials = [cost_derivative([pre_output]) * errorDeriv(target, output)]
     for i in range(numLayers):
         layer = -i-1
         #gets the partials for the nodes 
@@ -43,6 +44,16 @@ def gdBackprop(weights, pre_nodeValues, post_nodeValues, activation_derivative, 
 
 
     return deltaWeights
+
+
+def errorCalc(target, output):
+    return float(((target - output)**2)/2)
+
+def errorCalcDeriv(target, input):
+    print(target)
+    print(input)
+    return input - target
+
 
 #test function
 # weights = [[[1,2],[3,4]], [[1],[2]]]
