@@ -44,25 +44,26 @@ def gdBackprop(weights, pre_nodeValues, post_nodeValues, activation_derivative, 
 
     return deltaWeights
 
-weights = [[[1,2],[3,4]], [[1],[2]]]
+#test function
+# weights = [[[1,2],[3,4]], [[1],[2]]]
 
-pre_nodeValues = [[1,1], [4,6]]
-post_nodeValues = [[1,1], [16,36]]
+# pre_nodeValues = [[1,1], [4,6]]
+# post_nodeValues = [[1,1], [16,36]]
 
-def func1(x):
-    return x
-def func2(x):
-    return x-92
+# def func1(x):
+#     return x
+# def func2(x):
+#     return x-92
 
-nodeValues = [4,6]
-inputVals = [1,1]
+# nodeValues = [4,6]
+# inputVals = [1,1]
 
-derivs = [-16,-24]
-output_derivatives = [[-4]]
-def func(x):
-    return 1 
+# derivs = [-16,-24]
+# output_derivatives = [[-4]]
+# def func(x):
+#     return 1 
 
-print(gdBackprop(weights, pre_nodeValues, post_nodeValues, func1, func, 0.5 , 88 , 88, func2))
+# print(gdBackprop(weights, pre_nodeValues, post_nodeValues, func1, func, 0.5 , 88 , 88, func2))
 
 
 
