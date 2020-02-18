@@ -1,6 +1,10 @@
 from django.urls import path
-from api.views import stocks
+from api import views
 
 urlpatterns = [
-    path('stocks/', stocks, name='stocks'),
+    path('stocks/', views.stockList, name='stockList'),
+    path('stocks/<int:pk>/', views.stock, name='stock'),
+    path('stockChanges/', views.stockChangeList, name='stockChangeList'),
+    path('stockChanges/<int:pk>', views.stockChange, name='stockChange'),
+    path('users/<int:pk>/', views.user, name='user')
 ]

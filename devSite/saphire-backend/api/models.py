@@ -1,6 +1,8 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Stock(models.Model):
+    watchedBy = models.ManyToManyField('UserProfile', blank=True, related_name='watchedStocks')
     date = models.DateField()
     name = models.CharField(max_length=200, default='', blank=True, null=True)
     vol = models.IntegerField()
@@ -26,4 +28,11 @@ class StockChange(models.Model):
 
     def __str__(self):
         return str(self.name)
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return str(self.pk)
+
 
