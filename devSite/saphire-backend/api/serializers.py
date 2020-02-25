@@ -12,7 +12,7 @@ class StockSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Stock
-        fields = ['date', 'name', 'vol', 'high', 'low', 'avg', 'open', 'close']
+        fields = ['id','date', 'name', 'vol', 'high', 'low', 'avg', 'open', 'close']
 
 class UserProfileSerializer(serializers.ModelSerializer):
     watchedStocks = StockSerializer(many=True)
