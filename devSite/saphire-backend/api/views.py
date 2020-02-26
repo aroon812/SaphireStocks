@@ -1,8 +1,9 @@
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from .models import Stock, StockChange, User, UserProfile
-from .serializers import StockSerializer, StockChangeSerializer, UserProfileSerializer, UserSerializer
+from .models import Stock, StockChange
+from django.contrib.auth import get_user_model
+from .serializers import StockSerializer, StockChangeSerializer, UserSerializer
 from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
@@ -107,8 +108,8 @@ class stockChange(APIView):
 
 class UserList(APIView):
     def get(self, request, format=None):
-        users = UserProfile.objects.all()
-        serializer = UserProfileSerializer(users, many=True)
+        users = get_user_model().objects.all()
+        serializer = UserSerializer(users, many=True)
         json = JSONRenderer().render(serializer.data)
         return Response(status=status.HTTP_200_OK, data={"data": json})
 
@@ -119,19 +120,20 @@ class UserList(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, 200)
+        print(serializer.errors)
         return Response({}, 400)
 
 class User(APIView):
     permission_classes = (AllowAny,)
 
     def get(self, request, pk, format=None):
-        user = User.objects.get(pk=pk)
+        user = get_user_model().objects.get(pk=pk)
         serializer = UserSerializer(user)
         json = JSONRenderer().render(serializer.data)
         return Response(status=status.HTTP_200_OK, data={"data": json})
 
     def put(self, request, pk, format="json"):
-        user = User.objects.get(pk=pk)
+        user = get_user_model().objects.get(pk=pk)
         serializer = UserSerializer(user, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -140,7 +142,7 @@ class User(APIView):
         return Response({}, 400)
 
     def patch(self, request, pk, format="json"):
-        user = User.objects.get(pk=pk)
+        user = get_user_model().objects.get(pk=pk)
         serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -162,11 +164,11 @@ class WatchStock(APIView):
         stockID = data.get("stockID")
 
         try:
-            user = UserProfile.objects.get(id=userID)
+            user = get_user_model().objects.get(pk=userID)
             stock = Stock.objects.get(id=stockID)
 
-            stock.watchedBy.add(user)
-            stock.save()
+            user.watchedStocks.add(stock)
+            user.save()
 
             return Response({}, 200)
         except Exception as e:

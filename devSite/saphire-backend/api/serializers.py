@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Stock, UserProfile, StockChange
+from .models import User, Stock, StockChange
 
 class StockField(serializers.Field):
     def to_representation(self, obj):
@@ -9,20 +9,13 @@ class StockField(serializers.Field):
         return data
 
 class StockSerializer(serializers.ModelSerializer):
-
+    #watchedBy = serializers.PrimaryKeyRelatedField(queryset=Stock.objects.all())
     class Meta:
         model = Stock
         fields = ['id','date', 'name', 'vol', 'high', 'low', 'avg', 'open', 'close']
 
-class UserProfileSerializer(serializers.ModelSerializer):
-    watchedStocks = StockSerializer(many=True)
-
-    class Meta:
-        model = UserProfile
-        fields = '__all__'
-
 class UserSerializer(serializers.ModelSerializer):
-    userprofile = UserProfile()
+    watchedStocks = StockSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
