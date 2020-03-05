@@ -1,23 +1,17 @@
 {
-  "files": {
-    "main.css": "/static/css/main.d1b05096.chunk.css",
-    "main.js": "/static/js/main.a9397afb.chunk.js",
-    "main.js.map": "/static/js/main.a9397afb.chunk.js.map",
-    "runtime-main.js": "/static/js/runtime-main.dabbb598.js",
-    "runtime-main.js.map": "/static/js/runtime-main.dabbb598.js.map",
-    "static/js/2.7746973b.chunk.js": "/static/js/2.7746973b.chunk.js",
-    "static/js/2.7746973b.chunk.js.map": "/static/js/2.7746973b.chunk.js.map",
-    "index.html": "/index.html",
-    "precache-manifest.82a1d890e9e666a2368d9abe62fe01b5.js": "/precache-manifest.82a1d890e9e666a2368d9abe62fe01b5.js",
-    "service-worker.js": "/service-worker.js",
-    "static/css/main.d1b05096.chunk.css.map": "/static/css/main.d1b05096.chunk.css.map",
-    "static/js/2.7746973b.chunk.js.LICENSE.txt": "/static/js/2.7746973b.chunk.js.LICENSE.txt",
-    "static/media/logo.svg": "/static/media/logo.5d5d9eef.svg"
-  },
-  "entrypoints": [
-    "static/js/runtime-main.dabbb598.js",
-    "static/js/2.7746973b.chunk.js",
-    "static/css/main.d1b05096.chunk.css",
-    "static/js/main.a9397afb.chunk.js"
-  ]
+  "main.css": "/static/css/main.d20d5913.chunk.css",
+  "main.js": "/static/js/main.a90ba31b.chunk.js",
+  "main.js.map": "/static/js/main.a90ba31b.chunk.js.map",
+  "runtime~main.js": "/static/js/runtime~main.a8a9905a.js",
+  "runtime~main.js.map": "/static/js/runtime~main.a8a9905a.js.map",
+  "static/css/2.5c34ce3e.chunk.css": "/static/css/2.5c34ce3e.chunk.css",
+  "static/js/2.6e048755.chunk.js": "/static/js/2.6e048755.chunk.js",
+  "static/js/2.6e048755.chunk.js.map": "/static/js/2.6e048755.chunk.js.map",
+  "index.html": "/index.html",
+  "precache-manifest.f3f3145be10c22cf641d8ee21a595915.js": "/precache-manifest.f3f3145be10c22cf641d8ee21a595915.js",
+  "service-worker.js": "/service-worker.js",
+  "static/css/2.5c34ce3e.chunk.css.map": "/static/css/2.5c34ce3e.chunk.css.map",
+  "static/css/main.d20d5913.chunk.css.map": "/static/css/main.d20d5913.chunk.css.map",
+  "static/media/SaphireLogoImg.png": "/static/media/SaphireLogoImg.bb8f0ef4.png",
+  "static/media/saphireLogo.png": "/static/media/saphireLogo.370ed824.png"
 }

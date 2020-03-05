@@ -2,12 +2,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from .models import Stock, StockChange
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate, login
 from .serializers import StockSerializer, StockChangeSerializer, UserSerializer
 from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from alpha_vantage.timeseries import TimeSeries
 from datetime import datetime
+
 
 class stockList(APIView):
 
@@ -199,7 +200,17 @@ class UpdateStock(APIView):
             print(e)
             return Response({'error': str(e)}, 400)
     
+class Signin(APIView):
+    def post(self, request, format=None):
+        data = request.data
+        username = data.get("username")
+        password = data.get("password")
+        user = authenticate(request, username=username, password=password)
 
+        if user is not None:
+            login(request, user)
+            print(request.user.is_authenticated)
+            return Response({}, 200)
     
 
 
