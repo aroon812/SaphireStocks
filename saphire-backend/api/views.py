@@ -6,6 +6,8 @@ from django.contrib.auth import get_user_model
 from .serializers import StockSerializer, StockChangeSerializer, UserSerializer
 from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from alpha_vantage.timeseries import TimeSeries
+from datetime import datetime
 
 class stockList(APIView):
 
@@ -174,6 +176,30 @@ class WatchStock(APIView):
         except Exception as e:
             print(e)
             return Response({'error': str(e)}, 400)
+
+class UpdateStock(APIView):
+    permission_classes = (AllowAny,)
+    
+    def post(self, request, format=None):
+        data = request.data
+        key = 'PLVU0FOZUJ18M46O'
+        ts = TimeSeries(key)
+        
+        try:
+            symbol = data.get("symbol")
+            aapl, meta = ts.get_daily(symbol=symbol)
+            recentDate = list(aapl)[0]
+            stockDict = dict(aapl[recentDate])
+            
+            stock = Stock.objects.create(date=recentDate, symbol=symbol, open=stockDict['1. open'], high=stockDict['2. high'], low=stockDict['3. low'], close=stockDict['4. close'], vol=stockDict['5. volume'], avg=0)
+            stock.save()
+
+            return Response({}, 200)
+        except Exception as e:
+            print(e)
+            return Response({'error': str(e)}, 400)
+    
+
     
 
 

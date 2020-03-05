@@ -12,7 +12,7 @@ class StockSerializer(serializers.ModelSerializer):
     #watchedBy = serializers.PrimaryKeyRelatedField(queryset=Stock.objects.all())
     class Meta:
         model = Stock
-        fields = ['id','date', 'name', 'vol', 'high', 'low', 'avg', 'open', 'close']
+        fields = ['id','symbol','date', 'name', 'vol', 'high', 'low', 'avg', 'open', 'close']
 
 class UserSerializer(serializers.ModelSerializer):
     watchedStocks = StockSerializer(many=True, read_only=True)

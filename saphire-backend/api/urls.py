@@ -8,5 +8,6 @@ urlpatterns = [
     path('stockChanges/<int:pk>/', views.stockChange.as_view(), name='stockChange'),
     path('users/', views.UserList.as_view(),name='userList'),
     path('users/<int:pk>/', views.User.as_view(), name='user'),
-    path('watchStock/', views.WatchStock.as_view(), name='watchStock')
+    path('watchStock/', views.WatchStock.as_view(), name='watchStock'),
+    path('updateStock/', views.UpdateStock.as_view(), name='updateStock')
 ]

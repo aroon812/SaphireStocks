@@ -23,4 +23,4 @@ yarn-debug.log*
 yarn-error.log*
 
 #database
-devSite/saphire-backend/db.sqlite3
+saphire-backend/db.sqlite3
