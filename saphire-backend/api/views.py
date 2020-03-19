@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from .models import Stock, StockChange
-from django.contrib.auth import get_user_model, authenticate, login
+from django.contrib.auth import get_user_model, authenticate, login, logout
 from .serializers import StockSerializer, StockChangeSerializer, UserSerializer
 from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -79,7 +79,7 @@ class stock(APIView):
 
 class stockChange(APIView):
     permission_classes = (AllowAny,)
-
+    
     def get(self, request, pk, format=None):
         stockChange = StockChange.objects.get(pk=pk)
         serializer = StockChangeSerializer(stockChange)
@@ -110,6 +110,7 @@ class stockChange(APIView):
         return Response({}, 204)
 
 class UserList(APIView):
+    
     def get(self, request, format=None):
         users = get_user_model().objects.all()
         serializer = UserSerializer(users, many=True)
@@ -154,7 +155,7 @@ class User(APIView):
         return Response({}, 400)
 
     def delete(self, request, pk, format=None):
-        user = User.objects.get(pk=pk)
+        user = get_user_model().objects.get(pk=pk)
         user.delete()
         return Response({}, 204)
 
@@ -181,16 +182,19 @@ class WatchStock(APIView):
 class UpdateStock(APIView):
     permission_classes = (AllowAny,)
     
-    def post(self, request, format=None):
+    def post(self, request, format='json'):
         data = request.data
-        key = 'PLVU0FOZUJ18M46O'
+        #key = 'PLVU0FOZUJ18M46O'
+        key = '23V86RX6LO5AUIX4'
         ts = TimeSeries(key)
         
         try:
+            print(data)
             symbol = data.get("symbol")
-            aapl, meta = ts.get_daily(symbol=symbol)
-            recentDate = list(aapl)[0]
-            stockDict = dict(aapl[recentDate])
+            print("symbol " + str(symbol))
+            stock, meta = ts.get_daily(symbol=symbol)
+            recentDate = list(stock)[0]
+            stockDict = dict(stock[recentDate])
             
             stock = Stock.objects.create(date=recentDate, symbol=symbol, open=stockDict['1. open'], high=stockDict['2. high'], low=stockDict['3. low'], close=stockDict['4. close'], vol=stockDict['5. volume'], avg=0)
             stock.save()
@@ -201,16 +205,46 @@ class UpdateStock(APIView):
             return Response({'error': str(e)}, 400)
     
 class Signin(APIView):
+    permission_classes = (AllowAny,)
+
     def post(self, request, format=None):
         data = request.data
-        username = data.get("username")
-        password = data.get("password")
-        user = authenticate(request, username=username, password=password)
+        print(request.user.is_authenticated)
+        print(request.user.username)
+        print(request.user.password)
+
+        user = authenticate(username='bash', password='bash')
+        print(request.user.is_authenticated)
+        print(user)
 
         if user is not None:
             login(request, user)
             print(request.user.is_authenticated)
+            print(user)
             return Response({}, 200)
+        else:
+            return Response({}, 400)
+
+class Signout(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request, format=None):
+        print(request.user.is_authenticated)
+        logout(request)
+        print(request.user.is_authenticated)
+        print(request.user)
+        #login(request)
+        #print(request.user.is_authenticated)
+        return Response({}, 200)
+
+class CheckAuthenticated(APIView):
+
+    def get(self, request, format=None):
+        print(request.user)
+        authenticated = request.user.is_authenticated
+
+        return Response({authenticated}, 200)
+
     
 
 

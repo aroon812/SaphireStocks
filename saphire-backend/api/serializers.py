@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import User, Stock, StockChange
+from django.contrib.auth import get_user_model
 
 class StockField(serializers.Field):
     def to_representation(self, obj):
@@ -16,6 +17,15 @@ class StockSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     watchedStocks = StockSerializer(many=True, read_only=True)
+
+    def create(self, validated_data):
+        user = get_user_model().objects.create(
+            username=validated_data['username']
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+
+        return user
 
     class Meta:
         model = User
