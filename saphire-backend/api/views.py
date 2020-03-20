@@ -233,8 +233,6 @@ class Signout(APIView):
         logout(request)
         print(request.user.is_authenticated)
         print(request.user)
-        #login(request)
-        #print(request.user.is_authenticated)
         return Response({}, 200)
 
 class CheckAuthenticated(APIView):
@@ -245,6 +243,6 @@ class CheckAuthenticated(APIView):
 
         return Response({authenticated}, 200)
 
-    
+
 
 

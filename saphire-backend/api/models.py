@@ -7,7 +7,6 @@ class User(AbstractUser):
     watchedStocks = models.ManyToManyField('Stock', blank=True, related_name='watchedBy')
     
 class Stock(models.Model):
-    #watchedBy = models.ManyToManyField('User', blank=True, related_name='watchedStocks')
     date = models.DateField()
     symbol = models.CharField(max_length=5, default='', blank=True, null=True)
     name = models.CharField(max_length=200, default='', blank=True, null=True)
