@@ -148,8 +148,13 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 CELERY_BEAT_SCHEDULE = {
     'task1': {
-        'task': 'api.tasks.task1',
+        'task': 'api.tasks.pull_stock_data',
         'schedule': crontab(minute="*", hour="*"),
+        #'args': (*args)
+    },
+    'task2' : {
+        'task': 'api.tasks.reset_stock_counter',
+        'schedule' : crontab(minute=0, hour=0),
         #'args': (*args)
     }
 }

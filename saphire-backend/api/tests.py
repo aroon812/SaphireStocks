@@ -5,6 +5,7 @@ import pandas
 import numpy
 import datetime
 import os
+import redis
 
 
 
@@ -12,72 +13,79 @@ class StockUpdateTestCase(TestCase):
     key = '23V86RX6LO5AUIX4'
     ts = TimeSeries(key)
 
-    def updateStock(self, symbol, name):
+    def update_stock(self, symbol, name):
         #key = 'PLVU0FOZUJ18M46O'
 
         try:
             print("Symbol: " + symbol + " Name: " + name)
             stock, meta = self.ts.get_daily(symbol=symbol)
-            recentDate = list(stock)[0]
-            stockDict = dict(stock[recentDate])
+            recent_date = list(stock)[0]
+            stock_dict = dict(stock[recent_date])
 
-            stock = Stock.objects.create(name=name, date=recentDate, symbol=symbol, open=stockDict['1. open'], high=stockDict[
-                                        '2. high'], low=stockDict['3. low'], close=stockDict['4. close'], vol=stockDict['5. volume'], avg=0)
+            stock = Stock.objects.create(name=name, date=recent_date, symbol=symbol, open=stock_dict['1. open'], high=stock_dict[
+                                        '2. high'], low=stock_dict['3. low'], close=stock_dict['4. close'], vol=stock_dict['5. volume'], avg=0)
             stock.save()
             
         except Exception as e:
                 print(e)
                 
-    def pullStockData(self):
-        now = datetime.datetime.now()
-        print("hour " + str(now.hour))
-          
-        base = now.hour * 60
+    def pull_stock_data(self):
+        calls_per_minute = 30
+        r = redis.Redis(host='localhost', port=6379, db=0)
+        base = int(r.get('stock_base'))
+        print("base: " + str(base))
         names = pandas.read_csv('api/namesData/stock_names.csv')
-     
-        for i in range(30):
+
+        for i in range(calls_per_minute):
+            print("length of names list: " + str(len(names)))
             print('iteration:' + str(i))
-            print(type(names['Ticker'][0]))
-            self.updateStock(names['Ticker'][base+i], names['Name'][base+i])
+            self.update_stock(names['Ticker'][base+i], names['Name'][base+i])
+
+        r.set('stock_base', base+calls_per_minute)
+
+    def reset_stock_counter(self):
+        r = redis.Redis(host='localhost', port=6379, db=0)
+        r.set('stock_base', 0)
+        print(r.get('stock_base'))
 
 class CalcAverages(TestCase):
 
-    def calc52DayAverage(self, ticker, date):
+    def calc_52_day_average(self, ticker, date):
         s = Stock(date='2020-1-4', symbol='AAPL', name="Apple", vol=1, high=1, low=1, avg=2, open=1, close=1)
         s.save()
-        s = Stock(date='2020-1-1', symbol='AAPL', name="Apple", vol=1, high=1, low=1, avg=2, open=1, close=1)
+        s = Stock(date='2020-1-1', symbol='AAPL', name="Apple", vol=1, high=1, low=1, avg=2, open=1, close=4)
         s.save()
-        s = Stock(date='2020-1-2', symbol='AAPL', name="Apple", vol=1, high=1, low=1, open=1, avg = 0, close=1)
+        s = Stock(date='2020-1-2', symbol='AAPL', name="Apple", vol=1, high=1, low=1, open=1, avg = 0, close=2)
         s.save()
 
         stock = Stock.objects.get(symbol=ticker, date=date)
         
-        prevDate = date - datetime.timedelta(days=1)
+        prev_date = date - datetime.timedelta(days=1)
         
-        if Stock.objects.filter(symbol=ticker, date=prevDate).exists():
-            prevStock = Stock.objects.get(symbol=ticker, date=prevDate)
+        if Stock.objects.filter(symbol=ticker, date=prev_date).exists():
+            prevStock = Stock.objects.get(symbol=ticker, date=prev_date)
             stock.avg = ((51 * prevStock.avg) + stock.close)/52
             print(stock.avg)
             stock.save()
 
         else:
-            prices = []
+            num_stocks = 0
             sum = 0
             for i in range(52):
                 curDate = date - datetime.timedelta(days=i)
                 
                 if Stock.objects.filter(symbol=ticker, date=curDate).exists():
-                    curStock = Stock.objects.get(symbol=ticker, date=curDate)
-                    prices.append(curStock.close)
-                    sum += curStock.close
+                    cur_stock = Stock.objects.get(symbol=ticker, date=curDate)
+                    num_stocks += 1
+                    sum += cur_stock.close
 
-            stock.avg = sum / len(prices)
+            stock.avg = sum / num_stocks
             print(stock.avg)
             stock.save()
 
-    def calcOneAverage(self):
+    def calc_one_average(self):
         date = datetime.datetime.strptime('2020-1-4', '%Y-%m-%d')
-        self.calc52DayAverage('AAPL', date)
+        self.calc_52_day_average('AAPL', date)
 
 
 

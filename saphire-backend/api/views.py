@@ -10,7 +10,7 @@ from alpha_vantage.timeseries import TimeSeries
 from datetime import datetime
 
 
-class stockList(APIView):
+class StockList(APIView):
 
     def get(self, request, format=None):
         stocks = Stock.objects.all()
@@ -28,11 +28,11 @@ class stockList(APIView):
         print(serializer.errors)
         return Response({}, 400)
 
-class stockChangeList(APIView):
+class StockChangeList(APIView):
 
     def get(self, request, format=None):
-        stockChanges = StockChange.objects.all()
-        serializer = StockChangeSerializer(stockChanges, many=True)
+        stock_changes = StockChange.objects.all()
+        serializer = StockChangeSerializer(stock_changes, many=True)
         json = JSONRenderer().render(serializer.data)
         return Response(status=status.HTTP_200_OK, data={"data": json})
 
@@ -45,7 +45,7 @@ class stockChangeList(APIView):
             return Response(serializer.data, 200)
         return Response({}, 400)
 
-class stock(APIView):
+class Stock(APIView):
     permission_classes = (AllowAny,)
     
     def get(self, request, pk, format=None):
@@ -77,18 +77,18 @@ class stock(APIView):
         stock.delete()
         return Response({}, 204)
 
-class stockChange(APIView):
+class StockChange(APIView):
     permission_classes = (AllowAny,)
     
     def get(self, request, pk, format=None):
-        stockChange = StockChange.objects.get(pk=pk)
-        serializer = StockChangeSerializer(stockChange)
+        stock_change = StockChange.objects.get(pk=pk)
+        serializer = StockChangeSerializer(stock_change)
         json = JSONRenderer().render(serializer.data)
         return Response(status=status.HTTP_200_OK, data={"data": json}) 
 
     def put(self, request, pk, format="json"):
-        stockChange = StockChange.objects.get(pk=pk)
-        serializer = StockChangeSerializer(stockChange, data=request.data)
+        stock_change = StockChange.objects.get(pk=pk)
+        serializer = StockChangeSerializer(stock_change, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, 200)
@@ -96,8 +96,8 @@ class stockChange(APIView):
         return Response({}, 400)
 
     def patch(self, request, pk, format="json"):
-        stockChange = StockChange.objects.get(pk=pk)
-        serializer = StockChangeSerializer(stockChange, data=request.data, partial=True)
+        stock_change = StockChange.objects.get(pk=pk)
+        serializer = StockChangeSerializer(stock_change, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, 200)
@@ -105,8 +105,8 @@ class stockChange(APIView):
         return Response({}, 400)
 
     def delete(self, request, pk, format=None):
-        stockChange = StockChange.objects.get(pk=pk)
-        stockChange.delete()
+        stock_change = StockChange.objects.get(pk=pk)
+        stock_change.delete()
         return Response({}, 204)
 
 class UserList(APIView):
@@ -164,12 +164,12 @@ class WatchStock(APIView):
 
     def post(self, request, format=None):
         data = request.data
-        userID = data.get("userID")
-        stockID = data.get("stockID")
+        user_id = data.get("userID")
+        stock_id = data.get("stockID")
 
         try:
-            user = get_user_model().objects.get(pk=userID)
-            stock = Stock.objects.get(id=stockID)
+            user = get_user_model().objects.get(pk=user_id)
+            stock = Stock.objects.get(id=stock_id)
 
             user.watchedStocks.add(stock)
             user.save()
@@ -193,10 +193,10 @@ class UpdateStock(APIView):
             symbol = data.get("symbol")
             print("symbol " + str(symbol))
             stock, meta = ts.get_daily(symbol=symbol)
-            recentDate = list(stock)[0]
-            stockDict = dict(stock[recentDate])
+            recent_date = list(stock)[0]
+            stock_dict = dict(stock[recent_date])
             
-            stock = Stock.objects.create(date=recentDate, symbol=symbol, open=stockDict['1. open'], high=stockDict['2. high'], low=stockDict['3. low'], close=stockDict['4. close'], vol=stockDict['5. volume'], avg=0)
+            stock = Stock.objects.create(date=recent_date, symbol=symbol, open=stock_dict['1. open'], high=stock_dict['2. high'], low=stock_dict['3. low'], close=stock_dict['4. close'], vol=stock_dict['5. volume'], avg=0)
             stock.save()
 
             return Response({}, 200)
