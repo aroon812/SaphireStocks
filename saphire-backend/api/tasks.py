@@ -45,13 +45,7 @@ def pull_stock_data(self):
 def reset_stock_counter():
     r = redis.Redis(host='localhost', port=6379, db=0)
     r.set('stock_base', 0)
-    
+
 @task()
 def calc_percent_changes():
     print("temp")
-
-
-
-
-    
-        
