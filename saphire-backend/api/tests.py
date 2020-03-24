@@ -6,9 +6,7 @@ import numpy
 import datetime
 import os
 import redis
-from api.utils import calc_52_day_average
-
-
+from api.utils import calc_52_day_average, update_stock, calc_percent_changes
 
 class StockUpdateTestCase(TestCase):
     key = '23V86RX6LO5AUIX4'
@@ -114,6 +112,12 @@ class StockChangeTest(TestCase):
                 print(stock_change.stock)
 
                 stock_change.save()
+
+class StockUpdateAndChange(TestCase):
+    def execute(self):
+        s = Stock(date='2020-3-22', symbol='AAPL', name="Apple", vol=1, high=1, low=1, avg=2, open=1, close=1)
+        s.save()
+        update_stock('AAPL', 'Apple')
 
 
 
