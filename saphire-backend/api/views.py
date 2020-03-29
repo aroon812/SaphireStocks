@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from .models import Stock, StockChange
+from .models import Stock as SaphireStock, StockChange as SaphireStockChange
 from django.contrib.auth import get_user_model, authenticate, login, logout
 from .serializers import StockSerializer, StockChangeSerializer, UserSerializer
 from rest_framework.renderers import JSONRenderer
@@ -9,11 +9,10 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from alpha_vantage.timeseries import TimeSeries
 from datetime import datetime
 
-
 class StockList(APIView):
 
     def get(self, request, format=None):
-        stocks = Stock.objects.all()
+        stocks = SaphireStock.objects.all()
         serializer = StockSerializer(stocks, many=True)
         json = JSONRenderer().render(serializer.data)
         return Response(status=status.HTTP_200_OK, data={"data": json})
@@ -31,7 +30,7 @@ class StockList(APIView):
 class StockChangeList(APIView):
 
     def get(self, request, format=None):
-        stock_changes = StockChange.objects.all()
+        stock_changes = SaphireStockChange.objects.all()
         serializer = StockChangeSerializer(stock_changes, many=True)
         json = JSONRenderer().render(serializer.data)
         return Response(status=status.HTTP_200_OK, data={"data": json})
@@ -49,13 +48,13 @@ class Stock(APIView):
     permission_classes = (AllowAny,)
     
     def get(self, request, pk, format=None):
-        stock = Stock.objects.get(pk=pk)
+        stock = SaphireStock.objects.get(pk=pk)
         serializer = StockSerializer(stock)
         json = JSONRenderer().render(serializer.data)
         return Response(status=status.HTTP_200_OK, data={"data": json})
 
     def put(self, request, pk, format="json"):
-        stock = Stock.objects.get(pk=pk)
+        stock = SaphireStock.objects.get(pk=pk)
         serializer = StockSerializer(stock, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -64,7 +63,7 @@ class Stock(APIView):
         return Response({}, 400)
 
     def patch(self, request, pk, format="json"):
-        stock = Stock.objects.get(pk=pk)
+        stock = SaphireStock.objects.get(pk=pk)
         serializer = StockSerializer(stock, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -73,7 +72,7 @@ class Stock(APIView):
         return Response({}, 400)
 
     def delete(self, request, pk, format=None):
-        stock = Stock.objects.get(pk=pk)
+        stock = SaphireStock.objects.get(pk=pk)
         stock.delete()
         return Response({}, 204)
 
@@ -81,13 +80,13 @@ class StockChange(APIView):
     permission_classes = (AllowAny,)
     
     def get(self, request, pk, format=None):
-        stock_change = StockChange.objects.get(pk=pk)
+        stock_change = SaphireStockChange.objects.get(pk=pk)
         serializer = StockChangeSerializer(stock_change)
         json = JSONRenderer().render(serializer.data)
         return Response(status=status.HTTP_200_OK, data={"data": json}) 
 
     def put(self, request, pk, format="json"):
-        stock_change = StockChange.objects.get(pk=pk)
+        stock_change = SaphireStockChange.objects.get(pk=pk)
         serializer = StockChangeSerializer(stock_change, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -96,7 +95,7 @@ class StockChange(APIView):
         return Response({}, 400)
 
     def patch(self, request, pk, format="json"):
-        stock_change = StockChange.objects.get(pk=pk)
+        stock_change = SaphireStockChange.objects.get(pk=pk)
         serializer = StockChangeSerializer(stock_change, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -105,7 +104,7 @@ class StockChange(APIView):
         return Response({}, 400)
 
     def delete(self, request, pk, format=None):
-        stock_change = StockChange.objects.get(pk=pk)
+        stock_change = SaphireStockChange.objects.get(pk=pk)
         stock_change.delete()
         return Response({}, 204)
 
@@ -169,7 +168,7 @@ class WatchStock(APIView):
 
         try:
             user = get_user_model().objects.get(pk=user_id)
-            stock = Stock.objects.get(id=stock_id)
+            stock = SaphireStock.objects.get(id=stock_id)
 
             user.watchedStocks.add(stock)
             user.save()
@@ -196,7 +195,7 @@ class UpdateStock(APIView):
             recent_date = list(stock)[0]
             stock_dict = dict(stock[recent_date])
             
-            stock = Stock.objects.create(date=recent_date, symbol=symbol, open=stock_dict['1. open'], high=stock_dict['2. high'], low=stock_dict['3. low'], close=stock_dict['4. close'], vol=stock_dict['5. volume'], avg=0)
+            stock = SaphireStock.objects.create(date=recent_date, symbol=symbol, open=stock_dict['1. open'], high=stock_dict['2. high'], low=stock_dict['3. low'], close=stock_dict['4. close'], vol=stock_dict['5. volume'], avg=0)
             stock.save()
 
             return Response({}, 200)
