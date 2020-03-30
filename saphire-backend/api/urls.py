@@ -1,6 +1,7 @@
 from django.urls import path
 from api import views
 from django.contrib.auth import views as auth_views
+from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
     path('stocks/', views.StockList.as_view(), name='stockList'),
@@ -14,5 +15,7 @@ urlpatterns = [
     path('signIn/', views.Signin.as_view(), name='signIn'),
     path('signOut/', views.Signout.as_view(), name='signOut'),
     path('checkAuthenticated/', views.CheckAuthenticated.as_view(), name='checkAuthenticated'),
+    path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
+
     
 ]
