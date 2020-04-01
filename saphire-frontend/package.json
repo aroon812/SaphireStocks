@@ -19,6 +19,7 @@
     "@progress/kendo-theme-material": "^2.3.2",
     "bootstrap-4-grid": "^2.4.1",
     "hammerjs": "^2.0.8",
+    "newsapi": "^2.4.0",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
     "react-scripts": "2.1.8"
