@@ -1,6 +1,3 @@
-
-import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
 import { Dialog, DialogActionsBar } from '@progress/kendo-react-dialogs';
 import { Input } from '@progress/kendo-react-inputs'; 
 import { Button, ButtonGroup, Toolbar, ToolbarItem } from '@progress/kendo-react-buttons';
@@ -18,13 +15,16 @@ import { MyStocksContainer } from './components/MyStocksContainer';
 import { PredictionContainer } from './components/PredictionsContainer';
 import { NewsContainer } from './components/NewsContainer';
 import { InsightsContainer } from './components/InsightsContainer';
+import { LoginComponent } from './components/LoginComponent';
 
 
-
+import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 
 import '@progress/kendo-theme-material/dist/all.css';
 import './App.css';
 import 'bootstrap-4-grid/css/grid.min.css';
+
 
 class App extends Component {
   constructor(props) {
@@ -32,10 +32,7 @@ class App extends Component {
     this.appContainer = React.createRef();
     this.state = {
       showDialog: false,
-      showLogin: false,
-      selected: 0,
-      email: "",
-      password: ""
+      selected: 0
     }
   }
   
@@ -50,30 +47,10 @@ class App extends Component {
   }
 
   handleLogin = () => {
-    console.log(this.state.email);
-    console.log(this.state.password);
-    this.setState({ 
-      email: "",
-      password: "",
-      showLogin: !this.state.showLogin
-    }, () => console.log(this.state))
-
-  }
-
-  handleLoginExit = () => {
     this.setState({ 
       showLogin: !this.state.showLogin
     }, () => console.log(this.state))
   }
-
-  
-  handleLoginChange = event => {
-    this.setState({ 
-      [event.target.name]: event.target.value,
-    }, () => console.log(this.state))
-  }
-
-
 
   handleRegistration = () => {
     this.setState({
@@ -158,29 +135,7 @@ class App extends Component {
 							</Dialog>
 						}
             {this.state.showLogin &&
-							<Dialog title={"Sign In"} onClose={this.handleLoginExit}>
-                
-                  <div className="col">
-                    <div className="row">
-                      <p>Please enter your email and password.</p>
-                    </div>
-                    
-                      
-                    <div className="row justify-content-center">
-                      <Input label="Email" type="email" name="email" value={this.state.email} onChange={this.handleLoginChange} />
-                    </div>
-                    <div className="row justify-content-center">
-                      <Input label="Password" type="password" name="password" value={this.state.password} onChange={this.handleLoginChange} />                   
-                    </div>
-                  </div>
-                
-            <DialogActionsBar>
-              <Button onClick={this.handleRegistration}>Create Account</Button>
-              <Button primary={true} onClick={this.handleLogin}>Sign In</Button>
-            </DialogActionsBar>
-            
-          </Dialog>
-          
+							<LoginComponent />
 						}
             {this.state.showResgistration &&
 							<Dialog title={"Create Account"} onClose={this.handleRegistration}>

@@ -5,7 +5,12 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     watchedStocks = models.ManyToManyField('Stock', blank=True, related_name='watchedBy')
-    
+    username = None
+    email = models.EmailField(_('email address'), unique=True)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
 class Stock(models.Model):
     date = models.DateField()
     symbol = models.CharField(max_length=5, default='', blank=True, null=True)

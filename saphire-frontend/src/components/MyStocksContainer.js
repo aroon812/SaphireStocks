@@ -15,6 +15,7 @@ const processData = (data) => {
 export const MyStocksContainer = () => (
 
   <div>
+    
     <Grid style={{ height: '435px' }} data="">
       <Column field="Ticker" title="Ticker" width="100px" />
       <Column field="PriceHistory" width="150px" cell={SparkLineChartCell} title="Price history" />
