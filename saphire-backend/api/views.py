@@ -2,12 +2,15 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from .models import Stock as SaphireStock, StockChange as SaphireStockChange
-from django.contrib.auth import get_user_model, authenticate, login, logout
+from django.contrib.auth import get_user_model, authenticate, login, logout, update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 from .serializers import StockSerializer, StockChangeSerializer, UserSerializer
 from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from alpha_vantage.timeseries import TimeSeries
 from datetime import datetime
+from rest_framework.decorators import api_view
+
 
 class StockList(APIView):
 
@@ -137,6 +140,7 @@ class User(APIView):
 
     def put(self, request, pk, format="json"):
         user = get_user_model().objects.get(pk=pk)
+        update_session_auth_hash(request, user)
         serializer = UserSerializer(user, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -146,6 +150,7 @@ class User(APIView):
 
     def patch(self, request, pk, format="json"):
         user = get_user_model().objects.get(pk=pk)
+        print(type(request.data))
         serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -157,6 +162,18 @@ class User(APIView):
         user = get_user_model().objects.get(pk=pk)
         user.delete()
         return Response({}, 204)
+
+@api_view(['POST'])
+def change_password(request, pk, format="json"):
+    if request.method == 'POST':
+        password = request.data.get("password")
+        try:
+            user = get_user_model().objects.get(pk=pk)
+            user.set_password(password)
+            user.save()
+            return Response({}, 200)
+        except:
+            return Response({}, 400)
 
 class WatchStock(APIView):
     permission_classes = (AllowAny,)

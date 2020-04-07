@@ -10,6 +10,7 @@ urlpatterns = [
     path('stockChanges/<int:pk>/', views.StockChange.as_view(), name='stockChange'),
     path('users/', views.UserList.as_view(),name='userList'),
     path('users/<int:pk>/', views.User.as_view(), name='user'),
+    path('users/<int:pk>/changePassword/', views.change_password, name='passwordChange'),
     path('watchStock/', views.WatchStock.as_view(), name='watchStock'),
     path('updateStock/', views.UpdateStock.as_view(), name='updateStock'),
     path('signIn/', views.Signin.as_view(), name='signIn'),
