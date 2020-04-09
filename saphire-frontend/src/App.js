@@ -48,16 +48,26 @@ class App extends Component {
       showDialog: !this.state.showDialog
     }, () => console.log(this.state))
   }
-
+//saphire@saphire.com
   handleLogin = () => {
-    console.log(this.state.email);
-    console.log(this.state.password);
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "POST", 'http://127.0.0.1:8000/api/api-token-auth/', false); // false for synchronous request
+    xmlHttp.setRequestHeader("Content-Type","application/json");
+    xmlHttp.send(JSON.stringify({ username: this.state.email, password: this.state.password }));
+  
+    
+    if (xmlHttp.status==200){
+      var json = JSON.parse(xmlHttp.responseText);
+      this.setState({
+        authtoken: json['token']
+      });
+    }
+
     this.setState({ 
       email: "",
       password: "",
-      showLogin: !this.state.showLogin
+      showLogin: !this.state.showLogin 
     }, () => console.log(this.state))
-
   }
 
   handleLoginExit = () => {
@@ -66,11 +76,15 @@ class App extends Component {
     }, () => console.log(this.state))
   }
 
+  handleShowLogin = () => {
+    this.setState({showLogin: !this.state.showLogin});
+  }
+
   
   handleLoginChange = event => {
     this.setState({ 
       [event.target.name]: event.target.value,
-    }, () => console.log(this.state))
+    })
   }
 
 
@@ -111,7 +125,7 @@ class App extends Component {
                       </div>
                       <Button className="float-right" onClick={this.handlePDFExport}>Export as PDF</Button>               
                       <Button className="float-right" onClick={this.handleShare}>Share</Button> 
-                      <Button className="float-right" onClick={this.handleLogin}>Sign In</Button>
+                      <Button className="float-right" onClick={this.handleShowLogin}>Sign In</Button>
                     </ToolbarItem>
                   </Toolbar>
 							</div>
