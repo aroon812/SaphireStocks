@@ -14,7 +14,8 @@ import Logo from './img/saphireLogo.png';
 
 import { StockChartContainer } from './components/StockChartContainer';
 import { MyStocksContainer } from './components/MyStocksContainer';
-
+import { SignInInput } from './components/SignInInput';
+import { RegistrationInput } from './components/RegistrationInput';
 import { PredictionContainer } from './components/PredictionsContainer';
 import { NewsContainer } from './components/NewsContainer';
 import { InsightsContainer } from './components/InsightsContainer';
@@ -30,12 +31,17 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.appContainer = React.createRef();
+    this.handleLoginStateChange = this.handleLoginStateChange.bind(this);
+    this.handleRegistrationStateChange = this.handleRegistrationStateChange.bind(this);
+
     this.state = {
       showDialog: false,
       showLogin: false,
+      showResgistration: false,
       selected: 0,
       email: "",
       password: ""
+      
     }
   }
   
@@ -48,48 +54,14 @@ class App extends Component {
       showDialog: !this.state.showDialog
     }, () => console.log(this.state))
   }
-//saphire@saphire.com
-  handleLogin = () => {
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "POST", 'http://127.0.0.1:8000/api/api-token-auth/', false); // false for synchronous request
-    xmlHttp.setRequestHeader("Content-Type","application/json");
-    xmlHttp.send(JSON.stringify({ username: this.state.email, password: this.state.password }));
-  
-    
-    if (xmlHttp.status==200){
-      var json = JSON.parse(xmlHttp.responseText);
-      this.setState({
-        authtoken: json['token']
-      });
-    }
 
-    this.setState({ 
-      email: "",
-      password: "",
-      showLogin: !this.state.showLogin 
-    }, () => console.log(this.state))
-  }
-
-  handleLoginExit = () => {
-    this.setState({ 
-      showLogin: !this.state.showLogin
-    }, () => console.log(this.state))
-  }
-
-  handleShowLogin = () => {
+  handleLoginStateChange = (token) => {
+    console.log(token);
     this.setState({showLogin: !this.state.showLogin});
   }
 
-  
-  handleLoginChange = event => {
-    this.setState({ 
-      [event.target.name]: event.target.value,
-    })
-  }
-
-
-
-  handleRegistration = () => {
+  handleRegistrationStateChange = () => {
+    console.log("registration state change test");
     this.setState({
       showResgistration: !this.state.showResgistration
     }, () => console.log(this.state))
@@ -125,14 +97,14 @@ class App extends Component {
                       </div>
                       <Button className="float-right" onClick={this.handlePDFExport}>Export as PDF</Button>               
                       <Button className="float-right" onClick={this.handleShare}>Share</Button> 
-                      <Button className="float-right" onClick={this.handleShowLogin}>Sign In</Button>
+                      <Button className="float-right" onClick={this.handleLoginStateChange}>Sign In</Button>
                     </ToolbarItem>
                   </Toolbar>
 							</div>
 					  </div>
             <div className="row">
               <div className="col-8">
-								<StockChartContainer symbol='AAPL' company={'Apple'} />
+                <StockChartContainer symbol='AAPL' company={'Apple'} />
 						  </div>
               <div className="col-4">
                 <h3>AI Predictions</h3>
@@ -172,57 +144,10 @@ class App extends Component {
 							</Dialog>
 						}
             {this.state.showLogin &&
-							<Dialog title={"Sign In"} onClose={this.handleLoginExit}>
-                
-                  <div className="col">
-                    <div className="row">
-                      <p>Please enter your email and password.</p>
-                    </div>
-                    
-                      
-                    <div className="row justify-content-center">
-                      <Input label="Email" type="email" name="email" value={this.state.email} onChange={this.handleLoginChange} />
-                    </div>
-                    <div className="row justify-content-center">
-                      <Input label="Password" type="password" name="password" value={this.state.password} onChange={this.handleLoginChange} />                   
-                    </div>
-                  </div>
-                
-            <DialogActionsBar>
-              <Button onClick={this.handleRegistration}>Create Account</Button>
-              <Button primary={true} onClick={this.handleLogin}>Sign In</Button>
-            </DialogActionsBar>
-            
-          </Dialog>
-          
+							<SignInInput handleLoginStateChange = {this.handleLoginStateChange} handleRegistrationStateChange = {this.handleRegistrationStateChange}/>
 						}
             {this.state.showResgistration &&
-							<Dialog title={"Create Account"} onClose={this.handleRegistration}>
-                <div className="col">
-                  <div className="row">
-                    <p>Please enter your first name, last name, email and new password.</p>
-                  </div>
-                  <div className="row justify-content-center">
-                    <Input label="First Name" />
-                  </div>
-                  <div className="row justify-content-center">
-                    <Input label="Last Name" />
-                  </div>
-                  <div className="row justify-content-center">
-                    <Input label="Email" />
-                  </div>
-                  <div className="row justify-content-center">
-                    <Input label="Password" />                   
-                  </div>
-                  <div className="row justify-content-center">
-                    <Input label="Confirm Password" />                   
-                  </div>
-                </div>
-              <DialogActionsBar>
-                <Button onClick={this.handleRegistration}>Cancel</Button>
-                <Button primary={true} onClick={this.handleRegistration}>Create Account</Button>
-              </DialogActionsBar>
-            </Dialog>
+              <RegistrationInput handleRegistrationStateChange = {this.handleRegistrationStateChange} />
 						}
           </div>
         </div>

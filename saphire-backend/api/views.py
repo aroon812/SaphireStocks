@@ -112,7 +112,7 @@ class StockChange(APIView):
         return Response({}, 204)
 
 class UserList(APIView):
-    
+    permission_classes = (AllowAny,)
     def get(self, request, format=None):
         users = get_user_model().objects.all()
         serializer = UserSerializer(users, many=True)
@@ -120,14 +120,24 @@ class UserList(APIView):
         return Response(status=status.HTTP_200_OK, data={"data": json})
 
     def post(self, request, format='json'):
+
         data = request.data
-        serializer = UserSerializer(data=data)
+        user = get_user_model().objects._create_user(email=data.get("email"), password=data.get("password"), username=data.get("username"))
+
+        if user is not None:
+            user.save()
+            return Response({}, 200)
+        return Response({}, 400)
         
+        """
+        serializer = UserSerializer(data=data)
+
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, 200)
         print(serializer.errors)
         return Response({}, 400)
+        """
 
 class User(APIView):
     permission_classes = (AllowAny,)
@@ -222,6 +232,7 @@ class UpdateStock(APIView):
     
 class Signin(APIView):
     permission_classes = (AllowAny,)
+    authentication_classes = (AllowAny,)
 
     def post(self, request, format=None):
         data = request.data
