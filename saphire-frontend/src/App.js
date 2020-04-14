@@ -56,7 +56,7 @@ class App extends Component {
   }
 
   handleLoginStateChange = (token) => {
-    console.log(token);
+    console.log("token: " + token);
     this.setState({showLogin: !this.state.showLogin});
   }
 

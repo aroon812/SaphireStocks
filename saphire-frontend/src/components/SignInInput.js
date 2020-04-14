@@ -9,7 +9,8 @@ export class SignInInput extends React.Component{
         this.appContainer = React.createRef();
         this.state = {
           email: "",
-          password: ""
+          password: "",
+          authtoken: ""
         }
       }
 
@@ -24,21 +25,28 @@ handleLogin = () => {
       var json = JSON.parse(xmlHttp.responseText);
       //console.log(json['token']);
       this.setState({
+        email: "",
+        password: "",
         authtoken: json['token']
-      });
-      console.log(this.state.authtoken);
+      }, () => this.props.handleLoginStateChange(json['token']));
+      this.handler()
     }
 
+    /*
     this.setState({ 
       email: "",
       password: "",
     }, () => console.log(this.state))
+    */
     
 
     //var token = this.state.authtoken;
     //this.props.handler(token);
   }
 
+  handler = () => {
+    console.log(this.state)
+  }
   
   handleLoginChange = event => {
     this.setState({ 
