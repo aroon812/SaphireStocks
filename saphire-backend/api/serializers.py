@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Stock, StockChange
+from .models import User, Stock, StockChange, Company
 from django.contrib.auth import get_user_model
 
 class StockField(serializers.Field):
@@ -9,11 +9,18 @@ class StockField(serializers.Field):
     def to_internal_value(self, data):
         return data
 
+class CompanySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Company
+        fields = '__all__'
+
 class StockSerializer(serializers.ModelSerializer):
+    company = serializers.PrimaryKeyRelatedField(queryset=Company.objects.all())
 
     class Meta:
         model = Stock
-        fields = ['id','symbol','date', 'name', 'vol', 'high', 'low', 'avg', 'open', 'close']
+        fields = ['id', 'company', 'date', 'vol', 'high', 'low', 'avg', 'open', 'close']
 
 class UserSerializer(serializers.ModelSerializer):
     watchedStocks = StockSerializer(many=True, read_only=True)

@@ -1,10 +1,10 @@
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from .models import Stock as SaphireStock, StockChange as SaphireStockChange
+from .models import Stock as SaphireStock, StockChange, Company as SaphireStockChange
 from django.contrib.auth import get_user_model, authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
-from .serializers import StockSerializer, StockChangeSerializer, UserSerializer
+from .serializers import StockSerializer, StockChangeSerializer, UserSerializer, CompanySerializer
 from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from alpha_vantage.timeseries import TimeSeries
@@ -45,6 +45,51 @@ class StockChangeList(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, 200)
+        return Response({}, 400)
+
+class CompanyList(APIView):
+
+    def get(self, request, format=None):
+        companies = Company.objects.all()
+        serializer = CompanySerializer(companies, many=True)
+        json = JSONRenderer().render(serializer.data)
+        return Response(status=status.HTTP_200_OK, data={"data": json})
+
+    def post(self, request, format='json'):
+        data = request.data
+        serializer = CompanySerializer(data=data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, 200)
+        print(serializer.errors)
+        return Response({}, 400)
+
+class Company(APIView):
+    permission_classes = (AllowAny,)
+    
+    def get(self, request, pk, format=None):
+        company = Company.objects.get(pk=pk)
+        serializer = CompanySerializer(company)
+        json = JSONRenderer().render(serializer.data)
+        return Response(status=status.HTTP_200_OK, data={"data": json})
+
+    def put(self, request, pk, format="json"):
+        company = Company.objects.get(pk=pk)
+        serializer = CompanySerializer(company, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, 200)
+        print(serializer.errors)
+        return Response({}, 400)
+
+    def patch(self, request, pk, format="json"):
+        company = Company.objects.get(pk=pk)
+        serializer = CompanySerializer(company, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, 200)
+        print(serializer.errors)
         return Response({}, 400)
 
 class Stock(APIView):
