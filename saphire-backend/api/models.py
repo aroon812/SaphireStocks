@@ -32,7 +32,7 @@ class MyUserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 
 class User(AbstractUser):
-    watchedStocks = models.ManyToManyField('Stock', blank=True, related_name='watchedBy')
+    watchedStocks = models.ManyToManyField('Company', blank=True, related_name='watchedBy')
     email = models.EmailField(unique=True)
     REQUIRED_FIELDS = []
     USERNAME_FIELD = 'email'
@@ -50,6 +50,7 @@ class User(AbstractUser):
 class Company(models.Model):
     symbol = models.CharField(max_length=5, default='', blank=True, null=False, unique=True, primary_key=True)
     name = models.CharField(max_length=200, default='', blank=True, null=True)
+    
     def __str__(self):
         return str(self.name)
 

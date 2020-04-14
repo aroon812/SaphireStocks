@@ -11,35 +11,17 @@ from api.utils import calc_52_day_average, update_stock, calc_percent_changes
 class StockUpdateTestCase(TestCase):
     key = '23V86RX6LO5AUIX4'
     ts = TimeSeries(key)
-
-    def update_stock(self, symbol, name):
-        #key = 'PLVU0FOZUJ18M46O'
-
-        try:
-            print("Symbol: " + symbol + " Name: " + name)
-            stock, meta = self.ts.get_daily(symbol=symbol)
-            recent_date = list(stock)[0]
-            stock_dict = dict(stock[recent_date])
-
-            stock = Stock.objects.create(name=name, date=recent_date, symbol=symbol, open=stock_dict['1. open'], high=stock_dict[
-                                        '2. high'], low=stock_dict['3. low'], close=stock_dict['4. close'], vol=stock_dict['5. volume'], avg=0)
-            stock.save()
-            calc_52_day_average(ticker=symbol, date=recent_date)
-            
-        except Exception as e:
-                print(e)
                 
     def pull_stock_data(self):
         calls_per_minute = 30
         r = redis.Redis(host='localhost', port=6379, db=0)
         base = int(r.get('stock_base'))
-        print("base: " + str(base))
         names = pandas.read_csv('api/namesData/stock_names.csv')
 
         for i in range(calls_per_minute):
-            print("length of names list: " + str(len(names)))
-            print('iteration:' + str(i))
-            self.update_stock(names['Ticker'][base+i], names['Name'][base+i])
+            if base+i < len(names):
+                print('iteration:' + str(i))
+                update_stock(names['Ticker'][base+i], names['Name'][base+i])
 
         r.set('stock_base', base+calls_per_minute)
 

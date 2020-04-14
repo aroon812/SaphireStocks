@@ -23,7 +23,7 @@ class StockSerializer(serializers.ModelSerializer):
         fields = ['id', 'company', 'date', 'vol', 'high', 'low', 'avg', 'open', 'close']
 
 class UserSerializer(serializers.ModelSerializer):
-    watchedStocks = StockSerializer(many=True, read_only=True)
+    watchedStocks = CompanySerializer(many=True, read_only=True)
 
     def create(self, validated_data):
         user = get_user_model().objects.create(

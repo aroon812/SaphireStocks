@@ -1,7 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 from celery import task
 from alpha_vantage.timeseries import TimeSeries
-from .models import Stock, StockChange
+from .models import Stock, StockChange, Company
 import pandas
 import numpy
 import datetime
@@ -17,9 +17,9 @@ def update_stock(symbol, name):
             print(stock)
             recent_date = list(stock)[0]
             stock_dict = dict(stock[recent_date])
-
-            stock = Stock.objects.create(date=recent_date, symbol=symbol, open=stock_dict['1. open'], high=stock_dict[
-                                        '2. high'], low=stock_dict['3. low'], close=stock_dict['4. close'], vol=stock_dict['5. volume'], avg=0, name=name)
+            company = Company.objects.get(symbol=symbol)
+            stock = Stock.objects.create(company=company, date=recent_date, open=stock_dict['1. open'], high=stock_dict[
+                                        '2. high'], low=stock_dict['3. low'], close=stock_dict['4. close'], vol=stock_dict['5. volume'], avg=0)
             stock.save()
             calc_52_day_average(symbol=symbol, date=recent_date)
             calc_percent_changes(symbol=symbol, date=recent_date)

@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from .models import Stock as SaphireStock, StockChange, Company as SaphireStockChange
+from .models import Stock as SaphireStock, StockChange as SaphireStockChange, Company as SaphireCompany
 from django.contrib.auth import get_user_model, authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from .serializers import StockSerializer, StockChangeSerializer, UserSerializer, CompanySerializer
@@ -50,7 +50,7 @@ class StockChangeList(APIView):
 class CompanyList(APIView):
 
     def get(self, request, format=None):
-        companies = Company.objects.all()
+        companies = SaphireCompany.objects.all()
         serializer = CompanySerializer(companies, many=True)
         json = JSONRenderer().render(serializer.data)
         return Response(status=status.HTTP_200_OK, data={"data": json})
@@ -69,13 +69,13 @@ class Company(APIView):
     permission_classes = (AllowAny,)
     
     def get(self, request, pk, format=None):
-        company = Company.objects.get(pk=pk)
+        company = SaphireCompany.objects.get(pk=pk)
         serializer = CompanySerializer(company)
         json = JSONRenderer().render(serializer.data)
         return Response(status=status.HTTP_200_OK, data={"data": json})
 
     def put(self, request, pk, format="json"):
-        company = Company.objects.get(pk=pk)
+        company = SaphireCompany.objects.get(pk=pk)
         serializer = CompanySerializer(company, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -84,7 +84,7 @@ class Company(APIView):
         return Response({}, 400)
 
     def patch(self, request, pk, format="json"):
-        company = Company.objects.get(pk=pk)
+        company = SaphireCompany.objects.get(pk=pk)
         serializer = CompanySerializer(company, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -236,11 +236,11 @@ class WatchStock(APIView):
     def post(self, request, format=None):
         data = request.data
         user_id = data.get("userID")
-        stock_id = data.get("stockID")
+        symbol = data.get("symbol")
 
         try:
             user = get_user_model().objects.get(pk=user_id)
-            stock = SaphireStock.objects.get(id=stock_id)
+            stock = SaphireCompany.objects.get(symbol=symbol)
 
             user.watchedStocks.add(stock)
             user.save()
@@ -267,7 +267,7 @@ class UpdateStock(APIView):
             recent_date = list(stock)[0]
             stock_dict = dict(stock[recent_date])
             
-            stock = SaphireStock.objects.create(date=recent_date, symbol=symbol, open=stock_dict['1. open'], high=stock_dict['2. high'], low=stock_dict['3. low'], close=stock_dict['4. close'], vol=stock_dict['5. volume'], avg=0)
+            stock = SaphireStock.objects.create(date=recent_date, company=symbol, open=stock_dict['1. open'], high=stock_dict['2. high'], low=stock_dict['3. low'], close=stock_dict['4. close'], vol=stock_dict['5. volume'], avg=0)
             stock.save()
 
             return Response({}, 200)
