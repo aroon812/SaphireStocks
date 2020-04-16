@@ -167,23 +167,16 @@ class UserList(APIView):
     def post(self, request, format='json'):
 
         data = request.data
-        user = get_user_model().objects._create_user(email=data.get("email"), password=data.get("password"), username=data.get("username"))
-
-        if user is not None:
-            user.save()
-            return Response({}, 200)
-        return Response({}, 400)
+        if not get_user_model().objects.filter(email=data.get("email")).exists():
+            user = get_user_model().objects._create_user(email=data.get("email"), password=data.get("password"), username=data.get("username"))
+            if user is not None:
+                user.save()
+                return Response({}, 200)
+            else:
+                return Response({}, 400)
+        else:
+            return Response({'message': 'The provided email address is already in use.'}, 409)
         
-        """
-        serializer = UserSerializer(data=data)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, 200)
-        print(serializer.errors)
-        return Response({}, 400)
-        """
-
 class User(APIView):
     permission_classes = (AllowAny,)
 
