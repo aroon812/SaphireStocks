@@ -8,8 +8,9 @@ from .serializers import StockSerializer, StockChangeSerializer, UserSerializer,
 from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from alpha_vantage.timeseries import TimeSeries
-from datetime import datetime
+from datetime import datetime, timedelta
 from rest_framework.decorators import api_view
+import json
 
 
 class StockList(APIView):
@@ -228,11 +229,10 @@ class WatchStock(APIView):
 
     def post(self, request, format=None):
         data = request.data
-        user_id = data.get("userID")
         symbol = data.get("symbol")
 
         try:
-            user = get_user_model().objects.get(pk=user_id)
+            user = request.user
             stock = SaphireCompany.objects.get(symbol=symbol)
 
             user.watchedStocks.add(stock)
@@ -257,57 +257,46 @@ class UpdateStock(APIView):
             symbol = data.get("symbol")
             print("symbol " + str(symbol))
             stock, meta = ts.get_daily(symbol=symbol)
-            recent_date = list(stock)[0]
-            stock_dict = dict(stock[recent_date])
+            #recent_date = list(stock)[0]
+           # print(list(stock))
+            company = SaphireCompany.objects.get(symbol=symbol)
+            for date in list(stock):
+                stock_dict = dict(stock[date])         
+                newStock = SaphireStock.objects.create(date=date, company=company, open=stock_dict['1. open'], high=stock_dict['2. high'], low=stock_dict['3. low'], close=stock_dict['4. close'], vol=stock_dict['5. volume'], avg=0)   
+                newStock.save()
             
-            stock = SaphireStock.objects.create(date=recent_date, company=symbol, open=stock_dict['1. open'], high=stock_dict['2. high'], low=stock_dict['3. low'], close=stock_dict['4. close'], vol=stock_dict['5. volume'], avg=0)
-            stock.save()
-
             return Response({}, 200)
         except Exception as e:
             print(e)
             return Response({'error': str(e)}, 400)
     
-class Signin(APIView):
-    permission_classes = (AllowAny,)
-    authentication_classes = (AllowAny,)
+class getWatchedStocks(APIView):
 
-    def post(self, request, format=None):
-        data = request.data
-        print(request.user.is_authenticated)
-        print(request.user.username)
-        print(request.user.password)
+    def post(self, request):
 
-        user = authenticate(username='bash', password='bash')
-        print(request.user.is_authenticated)
-        print(user)
+        try:
+            watched_companies = request.user.watchedStocks
+            company_dict = {}
+            print(datetime.today())
+            today = datetime.strptime(str(datetime.date(datetime.today())), '%Y-%m-%d')
+            prev_date = today - timedelta(days=30)
+            for company in watched_companies.all():
+                stock_days = SaphireStock.objects.filter(company=company, date__range=[prev_date, today])
+                day_list = []
+                for day in stock_days:
+                    serializer = StockSerializer(day)
+                    day_list.append(serializer.data)
+                company_dict[company.name] = day_list
+            
+            json_str = json.dumps(company_dict, ensure_ascii=False)
+            loadedJson = json.loads(json_str)
+            return Response(loadedJson, 200)
 
-        if user is not None:
-            login(request, user)
-            print(request.user.is_authenticated)
-            print(user)
-            return Response({}, 200)
-        else:
-            return Response({}, 400)
+        except Exception as e:
+            print(e)
+            return Response({'error': str(e)}, 400)
 
-class Signout(APIView):
-    permission_classes = (AllowAny,)
-
-    def post(self, request, format=None):
-        print(request.user.is_authenticated)
-        logout(request)
-        print(request.user.is_authenticated)
-        print(request.user)
-        return Response({}, 200)
-
-class CheckAuthenticated(APIView):
-
-    def get(self, request, format=None):
-        print(request.user)
-        authenticated = request.user.is_authenticated
-
-        return Response({authenticated}, 200)
-
+        
 
 
 

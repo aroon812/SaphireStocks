@@ -8,6 +8,46 @@ export const getStockNews = (company) => {
     return searchNews(company);
 }
 
+export const getWatchedStocksData = () => {
+    return userStocks();
+}
+
+function userStocks() {
+    var xmlHttp = new XMLHttpRequest();
+    var token = localStorage.getItem("token");
+    console.log("token: " + token);
+    xmlHttp.open("POST", "http://127.0.0.1:8000/api/watchedList/", false);
+    xmlHttp.setRequestHeader("Content-Type","application/json");
+    xmlHttp.setRequestHeader("Authorization", "Token " + token);
+    xmlHttp.send( null );
+
+    if (xmlHttp.status === 200){
+        var json = JSON.parse(xmlHttp.responseText);
+        console.log(json['Apple Inc.']);
+        var data = [];
+        var index = 0;
+        for (var stock in json){
+            console.log(stock);
+            var company = new Object;
+            var priceHistory = [];
+            var phIndex = 0;
+            company["Ticker"] = json[stock][0]['company'];
+            
+            for (var item in json[stock]){
+                console.log(json[stock][item]['close']);
+                priceHistory[phIndex] = json[stock][item]['close'];
+                phIndex++;
+            }
+            company["PriceHistory"] = priceHistory;
+            company["Action"] = "hello";
+            data[index] = company;
+            index++;
+        }
+        console.log(data);
+        return data;
+    }
+    
+}
 
 function searchStock(ticker) {
     var theUrl = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=' + ticker + '&outputsize=full&apikey=23V86RX6LO5AUIX4';
@@ -16,7 +56,7 @@ function searchStock(ticker) {
     xmlHttp.send( null );
 
     var json = JSON.parse(xmlHttp.responseText);
-
+    console.log(json);
     return json['Time Series (Daily)'];
 }
 

@@ -39,9 +39,6 @@ class App extends Component {
       showLogin: false,
       showResgistration: false,
       selected: 0,
-      email: "",
-      password: ""
-      
     }
   }
   
@@ -55,9 +52,9 @@ class App extends Component {
     }, () => console.log(this.state))
   }
 
-  handleLoginStateChange = (token) => {
-    console.log("token: " + token);
-    this.setState({showLogin: !this.state.showLogin});
+  handleLoginStateChange = () => {
+    this.setState({showLogin: !this.state.showLogin},
+      () => console.log(this.state));
   }
 
   handleRegistrationStateChange = () => {

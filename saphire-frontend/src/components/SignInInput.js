@@ -21,31 +21,15 @@ handleLogin = () => {
     xmlHttp.send(JSON.stringify({ username: this.state.email, password: this.state.password }));
    
     if (xmlHttp.status===200){
-     
       var json = JSON.parse(xmlHttp.responseText);
-      //console.log(json['token']);
       this.setState({
         email: "",
         password: "",
-        authtoken: json['token']
-      }, () => this.props.handleLoginStateChange(json['token']));
-      this.handler()
+      }, () => this.props.handleLoginStateChange());
+      //localStorage.setItem("refreshToken", json['refresh']);
+      //localStorage.setItem("accessToken", json['access']);
+      localStorage.setItem("token", json['token']);
     }
-
-    /*
-    this.setState({ 
-      email: "",
-      password: "",
-    }, () => console.log(this.state))
-    */
-    
-
-    //var token = this.state.authtoken;
-    //this.props.handler(token);
-  }
-
-  handler = () => {
-    console.log(this.state)
   }
   
   handleLoginChange = event => {
