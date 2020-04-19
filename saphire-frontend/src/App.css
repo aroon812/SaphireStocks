@@ -23,6 +23,10 @@ h5 {
   font-weight: bold;
 }
 
+.error {
+  color: red;
+  align-self: center;
+}
 
 .newsImg {
   display: flex;
