@@ -243,6 +243,23 @@ class WatchStock(APIView):
             print(e)
             return Response({'error': str(e)}, 400)
 
+    def delete(self, request, format=None):
+        data = request.data
+        symbol = data.get("symbol")
+
+        try:
+            user = request.user
+            stock = SaphireCompany.objects.get(symbol=symbol)
+
+            user.watchedStocks.remove(stock)
+            user.save()
+
+            return Response({}, 200)
+        except Exception as e:
+            print(e)
+            return Response({'error': str(e)}, 400)
+
+
 class UpdateStock(APIView):
     permission_classes = (AllowAny,)
     
