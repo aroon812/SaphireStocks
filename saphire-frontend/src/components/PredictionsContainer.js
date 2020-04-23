@@ -10,8 +10,8 @@ const Header = (text) => (
 
 export const PredictionContainer = () => (
     <div>
-        <Grid style={{ height: '312px' }}>
-            <Column field="Day" title={Header("Day")} width="100px" />
+        <Grid style={{ height: '400px' }}>
+            <Column field="Day" title={Header("Day")} width="200px" />
             <Column field="Prediction" title={Header("Prediction")} width="125px" />
             <Column field="Confidence" title={Header("Confidence")} width="125px"
                 cell={(props) => (

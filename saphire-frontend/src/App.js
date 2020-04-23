@@ -16,16 +16,15 @@ import { StockChartContainer } from './components/StockChartContainer';
 import { MyStocksContainer } from './components/MyStocksContainer';
 import { SignInInput } from './components/SignInInput';
 import { RegistrationInput } from './components/RegistrationInput';
-import { PredictionContainer } from './components/PredictionsContainer';
-import { NewsContainer } from './components/NewsContainer';
-import { InsightsContainer } from './components/InsightsContainer';
+
 
 
 
 
 import '@progress/kendo-theme-material/dist/all.css';
 import './App.css';
-import 'bootstrap-4-grid/css/grid.min.css';
+import 'bootstrap-4-grid/css/grid.min.css'; 
+import { TabsContainer } from './components/TabsContainer';
 
 class App extends Component {
   constructor(props) {
@@ -64,11 +63,6 @@ class App extends Component {
     }, () => console.log(this.state))
   }
 
-  
-  handleSelect = (e) => {
-      this.setState({selected: e.selected})
-  }
-
   Header4 = (text) => (
     <h4>{text}</h4>
   )
@@ -99,36 +93,24 @@ class App extends Component {
                   </Toolbar>
 							</div>
 					  </div>
+
             <div className="row">
               <div className="col-8">
                 <StockChartContainer symbol='AAPL' company={'Apple'} />
 						  </div>
               <div className="col-4">
-                <h3>AI Predictions</h3>
-                <PredictionContainer />
-							</div>
-            </div>
-            <div className="row">
-              <div className="col-8">
-                <div>
-                  <TabStrip  selected={this.state.selected} onSelect={this.handleSelect} >
-                    <TabStripTab title={this.Header4("Statistics")}>
-                      
-                    </TabStripTab>
-
-                    <TabStripTab title={this.Header4("Insights")}>
-                      <InsightsContainer />
-                    </TabStripTab>   
-                    <TabStripTab title={this.Header4("News")}>
-                      <NewsContainer symbol='AAPL' />
-                    </TabStripTab>
-                  </TabStrip>
-                </div>
-              </div>
-              <div className="col-4">
                 <h3>My Stocks</h3>
 								<MyStocksContainer />
               </div>
+            </div>
+
+            <div className="row">
+              <div className="col-12">
+                <div>
+                  <TabsContainer />
+                </div>
+              </div>
+
             </div>
             {this.state.showDialog &&
 							<Dialog title={"Share this report"} onClose={this.handleShare}>

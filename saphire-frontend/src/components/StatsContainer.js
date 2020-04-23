@@ -12,7 +12,7 @@ function searchStock(ticker) {
     return json;
 }
 
-export const InsightsContainer = () => (
+export const StatsContainer = () => (
     <div>
         <p>{searchStock('MSFT')}</p>
     </div>

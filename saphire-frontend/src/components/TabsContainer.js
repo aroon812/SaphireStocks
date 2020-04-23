@@ -1,25 +1,42 @@
+import React from "react";
 import { TabStrip } from '@progress/kendo-react-layout';
 import { TabStripTab } from '@progress/kendo-react-layout';
-import { PredictionContainer } from './components/PredictionsContainer';
-import { NewsContainer } from './components/NewsContainer';
-import { InsightsContainer } from './components/InsightsContainer';
+import { PredictionContainer } from './PredictionsContainer';
+import { NewsContainer } from './NewsContainer';
+import { StatsContainer } from './StatsContainer';
 
 
+export class TabsContainer extends React.Component{
+    constructor(props) {
+        super(props);
+        this.state = {
+            selected: 0,
+        }
+    }
 
-export const TabsContainer = (props) => {
-    return (
-        <TabStrip  selected={this.state.selected} onSelect={this.handleSelect} >
-            <TabStripTab title={this.Header4("Statistics")}>
+    handleSelect = (e) => {
+        this.setState({selected: e.selected})
+    }
 
-            </TabStripTab>
-            <TabStripTab title={this.Header4("Insights")}>
-                <InsightsContainer />
-            </TabStripTab>   
-            <TabStripTab title={this.Header4("News")}>
-                <NewsContainer symbol={props.symbol} />
-            </TabStripTab>
-        </TabStrip>
-    );
+    Header4 = (text) => (
+        <h4>{text}</h4>
+    )
+
+    render(){
+        return (
+            <TabStrip  selected={this.state.selected} onSelect={this.handleSelect} >
+                <TabStripTab title={this.Header4("AI Insights")}>
+                    <PredictionContainer />
+                </TabStripTab>
+                <TabStripTab title={this.Header4("Statistics")}>
+                    <StatsContainer />
+                </TabStripTab>   
+                <TabStripTab title={this.Header4("News")}>
+                    <NewsContainer symbol="MSFT" />
+                </TabStripTab>
+            </TabStrip>
+        );
+    }
 }
 
 
