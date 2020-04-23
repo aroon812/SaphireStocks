@@ -20,7 +20,7 @@ import { RegistrationInput } from './components/RegistrationInput';
 
 
 
-
+import ApexCharts from 'apexcharts'
 import '@progress/kendo-theme-material/dist/all.css';
 import './App.css';
 import 'bootstrap-4-grid/css/grid.min.css'; 

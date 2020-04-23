@@ -1,9 +1,0 @@
-.RangeButtons {
-  padding: 32px;
-}
-
-@media (max-width: 750px) {
-  .RangeButtons {
-    padding-top: 0;
-  }
-}

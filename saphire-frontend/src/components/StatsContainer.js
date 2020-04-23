@@ -1,19 +1,30 @@
 import React from 'react';
-import { Grid, GridColumn as Column } from '@progress/kendo-react-grid';
 
-function searchStock(ticker) {
-    var theUrl = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=' + ticker + '&outputsize=full&apikey=YVHHU0MSRH0ZO8ZQ';
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
-    xmlHttp.send( null );
+import {Grid, GridColumn as Column } from '@progress/kendo-react-grid';
+import {getStockNews} from '../data/appData';
 
-    var json = JSON.parse(xmlHttp.responseText);
+const Header = (text) => (
+    <span>
+        <h3>{text}</h3>
+    </span>
+    
+)
 
-    return json;
-}
 
-export const StatsContainer = () => (
+const artImg = (props) => <img className="newsImg" width="150" height="100" alt="No Image" src={props.dataItem.urlToImage}/>
+
+
+export const StatsContainer = (prop) => (
     <div>
-        <p>{searchStock('MSFT')}</p>
+        <Grid style={{ height: '400px' }} data={getStockNews(prop.symbol)}>
+            <Column title="Articles" field="urlToImage" width="200px" cell={artImg} />
+            <Column title=" " field="title" cell={(props) => (
+                <td>
+                    <a href={props.dataItem.url} target="_blank">
+                        <h4>{props.dataItem.title}</h4>
+                    </a>
+                </td>
+                )} />
+        </Grid>
     </div>
 );

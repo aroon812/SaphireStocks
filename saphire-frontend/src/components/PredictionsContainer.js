@@ -1,23 +1,23 @@
 import React from 'react';
-import { Grid, GridColumn as Column } from '@progress/kendo-react-grid';
 
-const Header = (text) => (
-    <span>
-        <h3>{text}</h3>
-    </span>
-    
-)
+import {Grid, GridColumn as Column } from '@progress/kendo-react-grid';
+import { ApexChart } from './Confidence';
+import {getStockNews} from '../data/appData';
 
-export const PredictionContainer = () => (
-    <div>
-        <Grid style={{ height: '400px' }}>
-            <Column field="Day" title={Header("Day")} width="200px" />
-            <Column field="Prediction" title={Header("Prediction")} width="125px" />
-            <Column field="Confidence" title={Header("Confidence")} width="125px"
-                cell={(props) => (
-                    <td>
-                    </td>
-            )} />
-        </Grid>
+
+export const PredictionContainer = (prop) => (
+    <div className="col-12"> 
+        <div className="row"> 
+        
+        </div>
+        <div className="row">
+            <Grid style={{ height: '300' }} data={getStockNews(prop.symbol)}>
+                <Column title="Percent Change (%)" field="urlToImage" width="150" cell="SampleText"/>
+                <Column title="Confidence (%)" field="urlToImage" width="200" cell="SampleText" />
+                <Column title="volatility (High/Low)" field="urlToImage" width="200" cell="SampleText" />
+                <Column title="Predicted Movement (+/-)" field="urlToImage" width="250" cell="SampleText" />
+                <Column title="Predicted Price ($)" field="urlToImage" width="175" cell="SampleText" />
+            </Grid>
+        </div>
     </div>
 );
