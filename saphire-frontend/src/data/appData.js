@@ -15,7 +15,7 @@ export const getWatchedStocksData = () => {
 function userStocks() {
     var xmlHttp = new XMLHttpRequest();
     var token = localStorage.getItem("token");
-    console.log("token: " + token);
+    
     xmlHttp.open("POST", "http://127.0.0.1:8000/api/watchedList/", false);
     xmlHttp.setRequestHeader("Content-Type","application/json");
     xmlHttp.setRequestHeader("Authorization", "Token " + token);
@@ -23,27 +23,24 @@ function userStocks() {
 
     if (xmlHttp.status === 200){
         var json = JSON.parse(xmlHttp.responseText);
-        console.log(json['Apple Inc.']);
         var data = [];
         var index = 0;
+
         for (var stock in json){
-            console.log(stock);
             var company = new Object;
             var priceHistory = [];
             var phIndex = 0;
             company["Ticker"] = json[stock][0]['company'];
-            
+
             for (var item in json[stock]){
-                console.log(json[stock][item]['close']);
                 priceHistory[phIndex] = json[stock][item]['close'];
                 phIndex++;
             }
             company["PriceHistory"] = priceHistory;
-            company["Action"] = "hello";
+            //company["Action"] = "delete";
             data[index] = company;
             index++;
         }
-        console.log(data);
         return data;
     }
     
@@ -56,7 +53,6 @@ function searchStock(ticker) {
     xmlHttp.send( null );
 
     var json = JSON.parse(xmlHttp.responseText);
-    console.log(json);
     return json['Time Series (Daily)'];
 }
 
