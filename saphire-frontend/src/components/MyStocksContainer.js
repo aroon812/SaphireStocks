@@ -19,7 +19,7 @@ const removeStock = (ticker) => {
 }
 
 const addStock = () => {
-
+  
 }
 
 export const MyStocksContainer = () => {
