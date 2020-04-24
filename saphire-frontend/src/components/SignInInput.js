@@ -6,7 +6,7 @@ import { Button, ButtonGroup, Toolbar, ToolbarItem } from '@progress/kendo-react
 export class SignInInput extends React.Component{
     constructor(props) {
         super(props);
-        this.appContainer = React.createRef();
+        //this.appContainer = React.createRef();
         this.state = {
           email: "",
           password: "",
