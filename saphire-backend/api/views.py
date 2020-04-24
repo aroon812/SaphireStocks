@@ -125,6 +125,29 @@ class Stock(APIView):
         stock.delete()
         return Response({}, 204)
 
+@api_view(['POST'])
+def stock_range(request, format="json"):
+    if request.method == 'POST':
+        ticker = request.data.get("ticker")
+        low_date = request.data.get("low_date")
+        high_date = request.data.get("high_date")
+        try:
+            company = SaphireCompany.objects.get(symbol=ticker)
+            stock_days = SaphireStock.objects.filter(company=company, date__range=[low_date, high_date])
+            stock_dict = {}
+            day_list = []
+
+            for day in stock_days:
+                serializer = StockSerializer(day)
+                day_list.append(serializer.data)
+
+            json_str = json.dumps(day_list, ensure_ascii=False)
+            loadedJson = json.loads(json_str)
+            return Response(loadedJson, 200)
+        except Exception as e:
+            print(e)
+            return Response({'error': str(e)}, 400)
+
 class StockChange(APIView):
     permission_classes = (AllowAny,)
     
@@ -166,10 +189,10 @@ class UserList(APIView):
         return Response(status=status.HTTP_200_OK, data={"data": json})
 
     def post(self, request, format='json'):
-
         data = request.data
+
         if not get_user_model().objects.filter(email=data.get("email")).exists():
-            user = get_user_model().objects._create_user(email=data.get("email"), password=data.get("password"), username=data.get("username"))
+            user = get_user_model().objects._create_user(email=data.get("email"), password=data.get("password"), username=data.get("email"), first_name=data.get("first_name"), last_name=data.get("last_name"))
             if user is not None:
                 user.save()
                 return Response({}, 200)
@@ -234,7 +257,6 @@ class WatchStock(APIView):
         try:
             user = request.user
             stock = SaphireCompany.objects.get(symbol=symbol)
-
             user.watchedStocks.add(stock)
             user.save()
 
@@ -290,11 +312,9 @@ class UpdateStock(APIView):
 class getWatchedStocks(APIView):
 
     def post(self, request):
-
         try:
             watched_companies = request.user.watchedStocks
             company_dict = {}
-            print(datetime.today())
             today = datetime.strptime(str(datetime.date(datetime.today())), '%Y-%m-%d')
             prev_date = today - timedelta(days=30)
             for company in watched_companies.all():

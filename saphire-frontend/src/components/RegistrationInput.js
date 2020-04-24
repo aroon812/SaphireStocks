@@ -65,8 +65,9 @@ export class RegistrationInput extends React.Component{
         break;
       case 'confirm': 
         match = (errors.confirm.localeCompare(errors.password))
+        console.log(value);
          errors.confirm = 
-          (this.state.confirm.length === this.state.password.length && match === 0)
+          (value !== this.state.password)
             ? 'Passwords must match!'
             : '';
         break;
@@ -74,13 +75,36 @@ export class RegistrationInput extends React.Component{
         break;
     }
 
-    this.setState({errors, [name]: value});
+    this.setState({errors, [name]: value}, () => console.log(this.state));
+
   }
 
   handleSubmit = (event) => {
     //event.preventDefault();
     if(validateForm(this.state.errors)) {
       console.info('Valid Form')
+      var xmlHttp = new XMLHttpRequest();
+      xmlHttp.open( "POST", 'http://127.0.0.1:8000/api/users/', false); // false for synchronous request
+      xmlHttp.setRequestHeader("Content-Type","application/json");
+      xmlHttp.send(JSON.stringify({ email: this.state.email, password: this.state.password, first_name: this.state.fName, last_name: this.state.lName }));
+      
+
+      if (xmlHttp.status===200){
+        xmlHttp.open( "POST", 'http://127.0.0.1:8000/api/api-token-auth/', false); // false for synchronous request
+        xmlHttp.setRequestHeader("Content-Type","application/json");
+        xmlHttp.send(JSON.stringify({ username: this.state.email, password: this.state.password }));
+
+        if (xmlHttp.status === 200){
+          var json = JSON.parse(xmlHttp.responseText);
+
+          this.setState({
+            email: "",
+            password: "",
+          }, () => this.props.handleRegistrationStateChange());
+
+          localStorage.setItem("token", json['token']);
+        }
+      }
     }else{
       console.error('Invalid Form')
     }
@@ -135,7 +159,7 @@ export class RegistrationInput extends React.Component{
         </div>
       <DialogActionsBar>
         <Button onClick={this.props.handleRegistrationStateChange}>Cancel</Button>
-        <Button primary={true} onClick={this.handleRegistration}>Create Account</Button>
+        <Button primary={true} onClick={this.handleSubmit}>Create Account</Button>
       </DialogActionsBar>
       </Dialog>
     );

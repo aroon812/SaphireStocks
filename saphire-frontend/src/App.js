@@ -62,6 +62,7 @@ class App extends Component {
     this.setState({
       showResgistration: !this.state.showResgistration
     }, () => console.log(this.state))
+    this.handleLoginStateChange();
   }
 
   

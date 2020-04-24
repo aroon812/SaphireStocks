@@ -15,7 +15,7 @@ import {getStockData} from '../data/appData';
 
 
 export const StockChartContainer = (prop) => {
-  const data = getStockData(prop.symbol)
+  const data = getStockData(prop.symbol);
 
   const from = new Date("2000-03-06");
   const to = new Date(Date.now());
