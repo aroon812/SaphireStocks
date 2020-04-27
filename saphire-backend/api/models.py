@@ -54,15 +54,40 @@ class Company(models.Model):
     def __str__(self):
         return str(self.name)
 
+"""
+'date': date,
+'company': symbol,
+'open': stock_dict['1. open'], 
+'high': stock_dict['2. high'], 
+'low': stock_dict['3. low'], 
+'close': stock_dict['4. close'], 
+'vol':stock_dict['5. volume']
+"""
+
 class Stock(models.Model):
-    date = models.DateField()
-    company = models.ForeignKey('Company', on_delete=models.CASCADE)
-    vol = models.IntegerField()
-    high = models.DecimalField(max_digits=10, decimal_places=4)
-    low = models.DecimalField(max_digits=10, decimal_places=4)
-    avg = models.DecimalField(max_digits=10, decimal_places=4)
-    open = models.DecimalField(max_digits=10, decimal_places=4)
-    close = models.DecimalField(max_digits=10, decimal_places=4)
+    date = models.DateField(null=False)
+    company = models.ForeignKey('Company', on_delete=models.CASCADE, null=False)
+    vol = models.IntegerField(null=False)
+    high = models.DecimalField(max_digits=15, decimal_places=4, null=False)
+    low = models.DecimalField(max_digits=15, decimal_places=4, null=False)
+    open = models.DecimalField(max_digits=15, decimal_places=4, null=False)
+    close = models.DecimalField(max_digits=15, decimal_places=4, null=False)
+    avg = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+    range = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+    single_day_change = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+    day_to_day_change = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+    ema_12_day = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+    ema_26_day = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+    vol_ema = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+    vol_avg_52_week = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+    high_52_day = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+    high_52_week = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+    low_52_day = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+    low_52_week = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+    avg_52_day = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+    avg_52_week = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+    stdev_52_day = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+    stdev_52_week = models.DecimalField(max_digits=15, decimal_places=4, default=0)
 
     def __str__(self):
         return str(self.company.name + " " + str(self.date))

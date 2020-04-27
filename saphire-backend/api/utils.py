@@ -10,7 +10,7 @@ import redis
 key = '23V86RX6LO5AUIX4'
 ts = TimeSeries(key)
 
-def update_stock(symbol, name):
+def update_stock(symbol, name, date):
 
         try:
             stock, meta = ts.get_daily(symbol=symbol)

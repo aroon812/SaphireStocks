@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import User, Stock, StockChange, Company
 from django.contrib.auth import get_user_model
+from .stockUtils import fillStockFields
 
 class StockField(serializers.Field):
     def to_representation(self, obj):
@@ -18,9 +19,26 @@ class CompanySerializer(serializers.ModelSerializer):
 class StockSerializer(serializers.ModelSerializer):
     company = serializers.PrimaryKeyRelatedField(queryset=Company.objects.all())
 
+    def create(self, validated_data):
+        stock = Stock.objects.create(
+            #company=Company.objects.get(symbol=validated_data['symbol']),
+            company=validated_data['company'],
+            date=validated_data['date'],
+            vol=validated_data['vol'],
+            high=validated_data['high'],
+            low=validated_data['low'],
+            open=validated_data['open'],
+            close=validated_data['close']
+        )
+        stock.save()
+        newStock = Stock.objects.get(date=stock.date, company=stock.company) 
+        fillStockFields(newStock, newStock.company)
+        
+        return stock
+    
     class Meta:
         model = Stock
-        fields = ['id', 'company', 'date', 'vol', 'high', 'low', 'avg', 'open', 'close']
+        fields = '__all__'
 
 class UserSerializer(serializers.ModelSerializer):
     watchedStocks = CompanySerializer(many=True, read_only=True)

@@ -1,12 +1,58 @@
 from django.test import TestCase
 from alpha_vantage.timeseries import TimeSeries
-from .models import Stock, StockChange
+from .models import Stock, StockChange, Company
 import pandas
 import numpy
 import datetime
 import os
 import redis
-from api.utils import calc_52_day_average, update_stock, calc_percent_changes
+import api.stockUtils as sUtils
+
+class StockCreateTestCase(TestCase):
+    def test(self):
+        company = Company(symbol='AAPL', name='Apple Inc.')
+        company.save()
+        stock = Stock(date='2021-1-1', company=company, vol=1, high=7, low=1, open=1, close=4)
+        self.initialize(stock,company)
+        stock.save()
+        stock = Stock(date='2021-1-2', company=company, vol=1, high=2, low=1, open=1, close=2)
+        
+        self.initialize(stock, company)
+        print(stock.range)
+        print(stock.avg)
+        print(stock.single_day_change)
+        print(stock.day_to_day_change)
+        print(stock.ema_12_day)
+        print(stock.ema_26_day)
+        print(stock.vol_avg_52_week)
+        print(stock.high_52_day)
+        print(stock.high_52_week)
+        print(stock.low_52_day)
+        print(stock.low_52_week)
+        print(stock.avg_52_day)
+        print(stock.avg_52_week)
+        print(stock.stdev_52_day)
+        print(stock.stdev_52_week)
+
+
+    def initialize(self, stock, company):
+        date = datetime.datetime.strptime(stock.date, '%Y-%m-%d')
+        prev_date = date - datetime.timedelta(days=1)
+
+        try:
+            prev_stock = Stock.objects.get(company=company, date=prev_date)
+        except Stock.DoesNotExist:
+            prev_stock = None
+
+        sUtils.calc_range(stock)
+        sUtils.calc_avg(stock)
+        sUtils.calc_single_day_change(stock)
+        sUtils.calc_day_to_day_change(stock, prev_stock, company)
+        sUtils.calc_ema_12_day(stock, prev_stock, company)
+        sUtils.calc_ema_26_day(stock, prev_stock, company)
+        sUtils.calc_52_day_metrics(stock, date, company)
+        sUtils.calc_52_week_metrics(stock, date, company)
+        stock.save()
 
 class StockUpdateTestCase(TestCase):
     key = '23V86RX6LO5AUIX4'
