@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 from celery import task
 from alpha_vantage.timeseries import TimeSeries
 from .models import Stock, StockChange, Company
+from .serializers import StockSerializer
 import pandas
 import numpy
 import datetime
@@ -10,66 +11,83 @@ import redis
 key = '23V86RX6LO5AUIX4'
 ts = TimeSeries(key)
 
-def update_stock(symbol, name, date):
+def update_historical_stocks():
+    names = pandas.read_csv('api/namesData/stock_names.csv')
+
+    for i in range(len(names)):
+        print('iteration:' + str(i))
+        create_company(names['Ticker'][i], names['Name'][i])
+        update_historical_stock_single(names['Ticker'][i])
+
+def update_historical_stock_single(symbol):
+    try: 
+        stock, meta = ts.get_daily(symbol=symbol, outputsize='full')
+        company = Company.objects.get(symbol=symbol)
+        dates = list(stock)
+        dates.reverse()
+        
+        for date in dates:
+            print(symbol + " " + str(len(dates)) + " " + str(date))
+            stock_dict = dict(stock[date]) 
+            
+            validated_data = {
+                'date': date,
+                'company': symbol,
+                'open': stock_dict['1. open'], 
+                'high': stock_dict['2. high'], 
+                'low': stock_dict['3. low'], 
+                'close': stock_dict['4. close'], 
+                'vol':stock_dict['5. volume']
+            }
+            
+            serializer = StockSerializer(data=validated_data)
+            if serializer.is_valid():
+                serializer.save()
+                
+    except Exception as e:
+        print(e)
+
+def create_company(symbol, name):
+    if not Company.objects.filter(symbol=symbol, name=name).exists():
+        print(symbol)
+        print(name)
+        company = Company.objects.create(symbol=symbol, name=name)
+        company.save()
+
+
+def update_stock(symbol, name):
 
         try:
+            create_company(symbol, name)
             stock, meta = ts.get_daily(symbol=symbol)
             print(stock)
             recent_date = list(stock)[0]
             stock_dict = dict(stock[recent_date])
+            validated_data = {
+                    'date': recent_date,
+                    'company': symbol,
+                    'open': stock_dict['1. open'], 
+                    'high': stock_dict['2. high'], 
+                    'low': stock_dict['3. low'], 
+                    'close': stock_dict['4. close'], 
+                    'vol':stock_dict['5. volume']
+                }
+                
+            serializer = StockSerializer(data=validated_data)
+            if serializer.is_valid():
+                serializer.save()
+                    
+            """
             company = Company.objects.get(symbol=symbol)
             stock = Stock.objects.create(company=company, date=recent_date, open=stock_dict['1. open'], high=stock_dict[
                                         '2. high'], low=stock_dict['3. low'], close=stock_dict['4. close'], vol=stock_dict['5. volume'], avg=0)
             stock.save()
             calc_52_day_average(symbol=symbol, date=recent_date)
             calc_percent_changes(symbol=symbol, date=recent_date)
+            """
             
         except Exception as e:
                 print(e)
 
-def calc_52_day_average(symbol, date):
-        print(date)
-        stock = Stock.objects.get(symbol=symbol, date=date)
-        date = datetime.datetime.strptime(date, '%Y-%m-%d')
-        prev_date = date - datetime.timedelta(days=1)
-        
-        if Stock.objects.filter(symbol=symbol, date=prev_date).exists():
-            prevStock = Stock.objects.get(symbol=symbol, date=prev_date)
-            stock.avg = ((51 * prevStock.avg) + stock.close)/52
-            print('prev exists')
-            print(stock.avg)
-            stock.save()
 
-        else:
-            num_stocks = 0
-            sum = 0
-            for i in range(52):
-                curDate = date - datetime.timedelta(days=i)
-                
-                if Stock.objects.filter(symbol=symbol, date=curDate).exists():
-                    cur_stock = Stock.objects.get(symbol=symbol, date=curDate)
-                    num_stocks += 1
-                    sum += cur_stock.close
-
-            stock.avg = sum / num_stocks
-            print('prev does not exist')
-            print(stock.avg)
-            stock.save()
-
-def calc_percent_changes(symbol, date):
-    date = datetime.datetime.strptime(date, '%Y-%m-%d')
-    before = date - datetime.timedelta(days=1)
-    stock = Stock.objects.get(symbol=symbol, date=date)
-
-    if Stock.objects.filter(symbol=stock.symbol, date=before).exists():
-        prev_stock = Stock.objects.get(symbol=stock.symbol, date=before)
-        vol = (stock.vol - prev_stock.vol)/prev_stock.vol
-        high = (stock.high - prev_stock.avg)/prev_stock.avg
-        low = (stock.low - prev_stock.avg)/prev_stock.avg
-        avg = (stock.avg - prev_stock.avg)/prev_stock.avg
-        open = (stock.open - prev_stock.avg)/prev_stock.avg
-        close = (stock.close - prev_stock.avg)/prev_stock.avg
-        stock_change = StockChange(stock=stock, date=stock.date, vol=vol, high=high, low=low, avg=avg, open=open, close=close)
-
-        stock_change.save()
 

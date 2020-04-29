@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from alpha_vantage.timeseries import TimeSeries
 from datetime import datetime, timedelta
 from rest_framework.decorators import api_view
-from .stockUtils import fillStockFields
+from .utils import update_historical_stocks
 import json
 
 class StockList(APIView):
@@ -95,6 +95,18 @@ class Company(APIView):
             return Response(serializer.data, 200)
         print(serializer.errors)
         return Response({}, 400)
+
+    def delete(self, request, pk, format="json"):
+        data = request.data
+        symbol=data.get('symbol')
+        try:
+            company = SaphireCompany.objects.get(symbol=symbol)
+            company.delete()
+            return Response({}, 200)
+        except Exception as e:
+            print(e)
+            return Response({'error': str(e)}, 400)
+
 
 class Stock(APIView):
     permission_classes = (AllowAny,)
@@ -288,42 +300,9 @@ class UpdateStock(APIView):
     permission_classes = (AllowAny,)
     
     def post(self, request, format='json'):
-        data = request.data
-        #key = 'PLVU0FOZUJ18M46O'
-        key = '23V86RX6LO5AUIX4'
-        ts = TimeSeries(key)
         
-        try:
-            print(data)
-            symbol = data.get("symbol")
-            print("symbol " + str(symbol))
-            stock, meta = ts.get_daily(symbol=symbol)
-            company = SaphireCompany.objects.get(symbol=symbol)
-            dates = list(stock)
-            dates.reverse()
-            
-            for date in dates:
-                stock_dict = dict(stock[date]) 
-                """        
-                newStock = SaphireStock.objects.create(date=date, company=company, open=stock_dict['1. open'], high=stock_dict['2. high'], low=stock_dict['3. low'], close=stock_dict['4. close'], vol=stock_dict['5. volume']) 
-
-                newStock.save()
-                """
-                
-                validated_data = {
-                    'date': date,
-                    'company': symbol,
-                    'open': stock_dict['1. open'], 
-                    'high': stock_dict['2. high'], 
-                    'low': stock_dict['3. low'], 
-                    'close': stock_dict['4. close'], 
-                    'vol':stock_dict['5. volume']
-                }
-                
-                serializer = StockSerializer(data=validated_data)
-                if serializer.is_valid():
-                    serializer.save()
-                    
+        try:  
+            update_historical_stocks()     
             return Response({}, 200)
         except Exception as e:
             print(e)
@@ -360,7 +339,7 @@ class DeleteStockList(APIView):
         try:
             date_to_delete = data.get("date")
             high = datetime.strptime(date_to_delete, '%Y-%m-%d')
-            low = high - timedelta(days=1000)
+            low = high - timedelta(days=10000)
             stocks = SaphireStock.objects.filter(date__range=[low, high])
             stocks.delete()
             return Response({}, 200)

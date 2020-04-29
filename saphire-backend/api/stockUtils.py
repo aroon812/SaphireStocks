@@ -2,6 +2,7 @@ from .models import Stock, StockChange, Company
 from django.db.models import Avg, Max, Min, StdDev
 from decimal import Decimal
 import datetime
+from alpha_vantage.timeseries import TimeSeries          
 
 def fillStockFields(stock, company):
     date = stock.date
@@ -45,6 +46,7 @@ def fillStockFields(stock, company):
     print("stdev_52_week: " + str(stock.stdev_52_week) + " type: " + str(type(stock.stdev_52_week)))
     """
     stock.save()
+    normalize_stock(stock)
 
 def calc_range(stock):
     stock.range = round(stock.high - stock.low, 4)
@@ -141,3 +143,33 @@ def calc_52_week_metrics(stock, end_date, company):
     else:
         stock.vol_avg_52_week = round(stock.vol, 4)
 
+def normalize_stock(stock):
+    vol = (stock.vol - stock.vol_avg_52_week)/stock.vol_avg_52_week
+    high = (stock.high - stock.avg_52_day)/stock.avg_52_day
+    low = (stock.low - stock.avg_52_day)/stock.avg_52_day
+    avg = (stock.avg - stock.avg_52_day)/stock.avg_52_day
+    open = (stock.open - stock.avg_52_day)/stock.avg_52_day
+    close = (stock.close - stock.avg_52_day)/stock.avg_52_day
+    range = (stock.range - stock.avg_52_day)/stock.avg_52_day
+    single_day_change = (stock.single_day_change - stock.avg_52_day)/stock.avg_52_day
+    day_to_day_change = (stock.day_to_day_change - stock.avg_52_day)/stock.avg_52_day
+    ema_12_day = (stock.ema_12_day - stock.avg_52_day)/stock.avg_52_day
+    ema_26_day = (stock.ema_26_day - stock.avg_52_day)/stock.avg_52_day
+    vol_ema = (stock.vol_ema - stock.vol_avg_52_week)/stock.vol_avg_52_week
+    vol_avg_52_week = (stock.vol_avg_52_week - stock.vol_avg_52_week)/stock.vol_avg_52_week
+    high_52_day = (stock.high_52_day - stock.avg_52_day)/stock.avg_52_day
+    high_52_week = (stock.high_52_week - stock.avg_52_day)/stock.avg_52_day
+    low_52_day = (stock.low_52_day - stock.avg_52_day)/stock.avg_52_day
+    low_52_week = (stock.low_52_week - stock.avg_52_day)/stock.avg_52_day
+    avg_52_day = (stock.avg_52_day - stock.avg_52_day)/stock.avg_52_day
+    avg_52_week = (stock.avg_52_week - stock.avg_52_day)/stock.avg_52_day
+    stdev_52_day = (stock.stdev_52_day - stock.avg_52_day)/stock.avg_52_day
+    stdev_52_week = (stock.stdev_52_week - stock.avg_52_day)/stock.avg_52_day
+    
+    stock_change = StockChange(
+                    stock=stock, date=stock.date, vol=vol, high=high, low=low, avg=avg, open=open, close=close, range=range, single_day_change=single_day_change, day_to_day_change=day_to_day_change,
+                    ema_12_day=ema_12_day, ema_26_day=ema_26_day, vol_ema=vol_ema, vol_avg_52_week=vol_avg_52_week, high_52_day=high_52_day, high_52_week=high_52_week, low_52_day=low_52_day, low_52_week=low_52_week,
+                    avg_52_day=avg_52_day, avg_52_week=avg_52_week, stdev_52_day=stdev_52_day, stdev_52_week=stdev_52_week
+                    )
+
+    stock_change.save()

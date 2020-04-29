@@ -1,18 +1,14 @@
 # Create your tasks here
 from __future__ import absolute_import, unicode_literals
 from celery import task
-from alpha_vantage.timeseries import TimeSeries
 from .models import Stock, StockChange
 import pandas
 import numpy
 import datetime
 import redis
-from api.utils import calc_52_day_average, update_stock
+from api.utils import update_stock
 
-key = '23V86RX6LO5AUIX4'
-ts = TimeSeries(key)
-
-@task
+@task()
 def pull_stock_data():
     calls_per_minute = 30
     r = redis.Redis(host='localhost', port=6379, db=0)

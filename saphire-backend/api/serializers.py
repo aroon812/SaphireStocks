@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import User, Stock, StockChange, Company
 from django.contrib.auth import get_user_model
-from .stockUtils import fillStockFields
+from .stockUtils import fillStockFields, normalize_stock
 
 class StockField(serializers.Field):
     def to_representation(self, obj):
@@ -21,7 +21,6 @@ class StockSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         stock = Stock.objects.create(
-            #company=Company.objects.get(symbol=validated_data['symbol']),
             company=validated_data['company'],
             date=validated_data['date'],
             vol=validated_data['vol'],
@@ -33,7 +32,7 @@ class StockSerializer(serializers.ModelSerializer):
         stock.save()
         newStock = Stock.objects.get(date=stock.date, company=stock.company) 
         fillStockFields(newStock, newStock.company)
-        
+        normalize_stock(newStock)
         return stock
     
     class Meta:
