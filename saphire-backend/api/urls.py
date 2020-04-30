@@ -14,12 +14,11 @@ urlpatterns = [
     path('users/', views.UserList.as_view(),name='userList'),
     path('users/<int:pk>/', views.User.as_view(), name='user'),
     path('companies/', views.CompanyList.as_view(), name='companyList'),
-    path('companies/<int:pk>/', views.Company.as_view(), name='company'),
+    path('companies/<str:pk>/', views.Company.as_view(), name='company'),
     path('users/<int:pk>/changePassword/', views.change_password, name='passwordChange'),
     path('watchStock/', views.WatchStock.as_view(), name='watchStock'),
     path('updateStock/', views.UpdateStock.as_view(), name='updateStock'),
     path('watchedList/', views.GetWatchedStocks.as_view(), name='watchedList'),
-    #path('token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    #path('token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh')
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'), 
+    path('predict/', views.predict, name='prediction'),
 ]

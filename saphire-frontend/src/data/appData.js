@@ -47,14 +47,12 @@ function userStocks() {
 }
 
 function searchStock(ticker) {
-    var token = localStorage.getItem("token");
     //var theUrl = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=' + ticker + '&outputsize=full&apikey=23V86RX6LO5AUIX4';
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.open( "POST", 'http://127.0.0.1:8000/api/stocks/stockRange/', false ); // false for synchronous request
     //xmlHttp.send( null );
 
     xmlHttp.setRequestHeader("Content-Type","application/json");
-    xmlHttp.setRequestHeader("Authorization", "Token " + token);
     xmlHttp.send(JSON.stringify({ ticker: ticker, low_date: "2019-11-22", high_date: "2020-4-17" }));
     //console.log(xmlHttp.responseText);
     var json = JSON.parse(xmlHttp.responseText);

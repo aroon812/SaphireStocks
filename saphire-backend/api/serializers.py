@@ -32,7 +32,6 @@ class StockSerializer(serializers.ModelSerializer):
         stock.save()
         newStock = Stock.objects.get(date=stock.date, company=stock.company) 
         fillStockFields(newStock, newStock.company)
-        normalize_stock(newStock)
         return stock
     
     class Meta:

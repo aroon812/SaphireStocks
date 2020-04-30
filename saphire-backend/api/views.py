@@ -9,19 +9,18 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from alpha_vantage.timeseries import TimeSeries
 from datetime import datetime, timedelta
-from rest_framework.decorators import api_view
+from rest_framework.decorators import authentication_classes, permission_classes, api_view
 from .utils import update_historical_stocks
 import json
+from machineLearning.predict import predictStock
 
 class StockList(APIView):
 
     def get(self, request, format=None):
         stocks = SaphireStock.objects.all()
         serializer = StockSerializer(stocks, many=True)
-        #json = JSONRenderer().render(serializer.data)
         json_str = json.dumps(serializer.data, ensure_ascii=False)
         loadedJson = json.loads(json_str)
-        #return Response(status=status.HTTP_200_OK, data={"data": json})
         return Response(loadedJson, 200)
 
     def post(self, request, format='json'):
@@ -39,8 +38,9 @@ class StockChangeList(APIView):
     def get(self, request, format=None):
         stock_changes = SaphireStockChange.objects.all()
         serializer = StockChangeSerializer(stock_changes, many=True)
-        json = JSONRenderer().render(serializer.data)
-        return Response(status=status.HTTP_200_OK, data={"data": json})
+        json_str = json.dumps(serializer.data, ensure_ascii=False)
+        loadedJson = json.loads(json_str)
+        return Response(loadedJson, 200)
 
     def post(self, request, format='json'):
         data = request.data
@@ -73,10 +73,16 @@ class Company(APIView):
     permission_classes = (AllowAny,)
     
     def get(self, request, pk, format=None):
-        company = SaphireCompany.objects.get(pk=pk)
-        serializer = CompanySerializer(company)
-        json = JSONRenderer().render(serializer.data)
-        return Response(status=status.HTTP_200_OK, data={"data": json})
+        try:
+            company = SaphireCompany.objects.get(pk=pk)
+            serializer = CompanySerializer(company, data=request.data)
+            if serializer.is_valid():
+                json_str = json.dumps(serializer.data, ensure_ascii=False)
+                loadedJson = json.loads(json_str)
+                return Response(loadedJson, 200)
+        except Exception as e:
+            print(e)
+            return Response({'error': str(e)}, 400)
 
     def put(self, request, pk, format="json"):
         company = SaphireCompany.objects.get(pk=pk)
@@ -114,8 +120,9 @@ class Stock(APIView):
     def get(self, request, pk, format=None):
         stock = SaphireStock.objects.get(pk=pk)
         serializer = StockSerializer(stock)
-        json = JSONRenderer().render(serializer.data)
-        return Response(status=status.HTTP_200_OK, data={"data": json})
+        json_str = json.dumps(serializer.data, ensure_ascii=False)
+        loadedJson = json.loads(json_str)
+        return Response(loadedJson, 200)
 
     def put(self, request, pk, format="json"):
         stock = SaphireStock.objects.get(pk=pk)
@@ -141,6 +148,8 @@ class Stock(APIView):
         return Response({}, 204)
 
 @api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
 def stock_range(request, format="json"):
     if request.method == 'POST':
         ticker = request.data.get("ticker")
@@ -263,7 +272,7 @@ def change_password(request, pk, format="json"):
             return Response({}, 400)
 
 class WatchStock(APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request, format=None):
         data = request.data
@@ -309,6 +318,7 @@ class UpdateStock(APIView):
             return Response({'error': str(e)}, 400)
     
 class GetWatchedStocks(APIView):
+    permission_classes = (IsAuthenticated)
 
     def post(self, request):
         try:
@@ -348,5 +358,17 @@ class DeleteStockList(APIView):
             print(e)
             return Response({'error': str(e)}, 400)
 
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
+def predict(request, format="json"):
+    if request.method == 'GET':
+        #ticker = request.data.get("ticker")
+        try: 
+            print(predictStock()) 
+            return Response({}, 200)
+        except Exception as e:
+            print(e)
+            return Response({'error': str(e)}, 400)
 
 
