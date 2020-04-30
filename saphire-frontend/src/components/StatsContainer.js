@@ -3,28 +3,20 @@ import React from 'react';
 import {Grid, GridColumn as Column } from '@progress/kendo-react-grid';
 import {getStockNews} from '../data/appData';
 
-const Header = (text) => (
-    <span>
-        <h3>{text}</h3>
-    </span>
-    
-)
-
-
-const artImg = (props) => <img className="newsImg" width="150" height="100" alt="No Image" src={props.dataItem.urlToImage}/>
-
 
 export const StatsContainer = (prop) => (
-    <div>
-        <Grid style={{ height: '400px' }} data={getStockNews(prop.symbol)}>
-            <Column title="Articles" field="urlToImage" width="200px" cell={artImg} />
-            <Column title=" " field="title" cell={(props) => (
-                <td>
-                    <a href={props.dataItem.url} target="_blank">
-                        <h4>{props.dataItem.title}</h4>
-                    </a>
-                </td>
-                )} />
-        </Grid>
+    <div className="col-12"> 
+        <div className="row"> 
+        
+        </div>
+        <div className="row">
+            <Grid style={{ height: '300' }} data={getStockNews(prop.symbol)}>
+                <Column title="Percent Change (%)" field="urlToImage" width="150" cell="SampleText"/>
+                <Column title="Confidence (%)" field="urlToImage" width="200" cell="SampleText" />
+                <Column title="volatility (High/Low)" field="urlToImage" width="200" cell="SampleText" />
+                <Column title="Predicted Movement (+/-)" field="urlToImage" width="250" cell="SampleText" />
+                <Column title="Predicted Price ($)" field="urlToImage" width="175" cell="SampleText" />
+            </Grid>
+        </div>
     </div>
 );

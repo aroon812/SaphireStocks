@@ -80,13 +80,15 @@ export class RegistrationInput extends React.Component{
   }
 
   handleSubmit = (event) => {
+    const errors = this.state;
     //event.preventDefault();
     if(validateForm(this.state.errors)) {
-      console.info('Valid Form')
+      var email = this.state.email.toLowerCase();
+      console.info('Valid Form');
       var xmlHttp = new XMLHttpRequest();
       xmlHttp.open( "POST", 'http://127.0.0.1:8000/api/users/', false); // false for synchronous request
       xmlHttp.setRequestHeader("Content-Type","application/json");
-      xmlHttp.send(JSON.stringify({ email: this.state.email, password: this.state.password, first_name: this.state.fName, last_name: this.state.lName }));
+      xmlHttp.send(JSON.stringify({ email: email, password: this.state.password, first_name: this.state.fName, last_name: this.state.lName }));
       
 
       if (xmlHttp.status===200){
@@ -106,7 +108,7 @@ export class RegistrationInput extends React.Component{
         }
       }
     }else{
-      console.error('Invalid Form')
+      errors.email = 'User with this email already exists!';//Lukas*
     }
   }
 
@@ -120,19 +122,15 @@ export class RegistrationInput extends React.Component{
             <div>
             <p>Please enter your first name, last name, email and new password.</p> <br/>
             {errors.fName.length > 0 && 
-            <p className='error'>  <br/>{errors.fName}</p>}
-
+            <p className='error'>  {errors.fName}</p>}
             {errors.lName.length > 0 && 
-            <p className='error'>  <br/>{errors.lName}</p>}
-
+            <p className='error'>  {errors.lName}</p>}
             {errors.email.length > 0 && 
-            <p className='error'>  <br/>{errors.email}</p>}
-
+            <p className='error'>  {errors.email}</p>}
             {errors.password.length > 0 && 
-            <p className='error'>  <br/>{errors.password}</p>}
-
+            <p className='error'>  {errors.password}</p>}
             {errors.confirm.length > 0 && 
-            <p className='error'>  <br/>{errors.confirm}</p>}   
+            <p className='error'>  {errors.confirm}</p>}   
             </div>
           </div>
 

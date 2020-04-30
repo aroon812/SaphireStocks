@@ -27,7 +27,7 @@ export const MyStocksContainer = () => {
 
   return (
     <div>
-      <Grid style={{ height: '435px' }} data={data}>
+      <Grid style={{ height: '325px' }} data={data}>
         <Column field="Ticker" title="Ticker" width="100px" />
         <Column field="PriceHistory" width="150px" cell={SparkLineChartCell} title="Price history" />
         <Column field="Action" width="100px"

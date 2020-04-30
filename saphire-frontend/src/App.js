@@ -97,7 +97,7 @@ class App extends Component {
 
             <div className="row">
               <div className="col-8">
-                <StockChartContainer symbol='AAPL' company={'Apple'} />
+                <StockChartContainer symbol='A' />
 						  </div>
               <div className="col-4">
                 <h3>My Stocks</h3>

@@ -1,6 +1,6 @@
 
-export const getStockData = (company) => {
-    return massageData(searchStock(company));
+export const getStockData = (company, from, to) => {
+    return massageData(searchStock(company, from, to));
     //return searchStock(company)
 }
 
@@ -46,17 +46,22 @@ function userStocks() {
     
 }
 
-function searchStock(ticker) {
+function searchStock(ticker, from, to) {
+    var token = localStorage.getItem("token");
+    console.log("token " + token);
     //var theUrl = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=' + ticker + '&outputsize=full&apikey=23V86RX6LO5AUIX4';
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.open( "POST", 'http://127.0.0.1:8000/api/stocks/stockRange/', false ); // false for synchronous request
     //xmlHttp.send( null );
 
     xmlHttp.setRequestHeader("Content-Type","application/json");
-    xmlHttp.send(JSON.stringify({ ticker: ticker, low_date: "2019-11-22", high_date: "2020-4-17" }));
-    //console.log(xmlHttp.responseText);
+    xmlHttp.setRequestHeader("Authorization", "Token " + token);
+
+    console.log(from);
+    console.log(to);
+    xmlHttp.send(JSON.stringify({ ticker: ticker, low_date: formatDate(from) , high_date: formatDate(to) }));
     var json = JSON.parse(xmlHttp.responseText);
-    console.log(json);
+    
     return json;
 }
 
@@ -64,17 +69,19 @@ function massageData(obj) {
     var result = "[";
 
     for (var day in obj) {
-        result += "{ \"Date\": \"\/Date(" + new Date(obj[day]["date"]).getTime() + ")\/\""
-                + ",\"Close\": " + obj[day]["close"] 
-                + ", \"Volume\": " + obj[day]["vol"] 
-                + ", \"Open\": " + obj[day]["open"] 
-                + ", \"High\": " + obj[day]["high"] 
-                + ", \"Low\": " + obj[day]["low"] + "},";
+        result += "{ \"Date\": \"\\/Date(" + new Date(obj[day]["date"]).getTime() + ")\\/\""
+                + ",\n\"Close\": " + obj[day]["close"] 
+                + ",\n\"Volume\": " + obj[day]["vol"] 
+                + ",\n\"Open\": " + obj[day]["open"] 
+                + ",\n\"High\": " + obj[day]["high"] 
+                + ",\n\"Low\": " + obj[day]["low"] + "},\n";
     }
-
-    result = result.substring(0, result.length - 1);
+    result = result.trim();
+    result = result.substring(0, result.length - 1); 
     result += "]";
-    console.log(result);
+    console.log(result)
+    JSON.parse(result);
+    console.log("success");
     return JSON.parse(result);
 }
 
@@ -90,5 +97,19 @@ function searchNews(company) {
 
     var json = JSON.parse(xmlHttp.responseText);
 
-    return json.articles;;
+    return json.articles;
+}
+
+function formatDate(date) {
+    var d = new Date(date),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+
+    if (month.length < 2) 
+        month = '0' + month;
+    if (day.length < 2) 
+        day = '0' + day;
+
+    return [year, month, day].join('-');
 }
