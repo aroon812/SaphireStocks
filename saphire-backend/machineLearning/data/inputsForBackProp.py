@@ -9,7 +9,11 @@ def getInputs(tic, date, days):
     start_date = end_date - timedelta(days=days)
     company = Company.objects.get(symbol=tic)
     regStocks = Stock.objects.filter(company=company, date__range=[start_date, end_date])
-    print("length: " + str(len(regStocks)))
+    while len(regStocks) < 20:
+        days += 1
+        start_date = end_date - timedelta(days=days)
+        regStocks = Stock.objects.filter(company=company, date__range=[start_date, end_date])
+
     output=[]
     for regStock in regStocks:
         stock = StockChange.objects.get(stock=regStock)

@@ -15,6 +15,7 @@ urlpatterns = [
     path('users/<int:pk>/', views.User.as_view(), name='user'),
     path('companies/', views.CompanyList.as_view(), name='companyList'),
     path('companies/<str:pk>/', views.Company.as_view(), name='company'),
+    path('search/', views.search, name='search'),
     path('users/<int:pk>/changePassword/', views.change_password, name='passwordChange'),
     path('watchStock/', views.WatchStock.as_view(), name='watchStock'),
     path('updateStock/', views.UpdateStock.as_view(), name='updateStock'),

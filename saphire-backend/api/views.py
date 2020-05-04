@@ -13,6 +13,7 @@ from rest_framework.decorators import authentication_classes, permission_classes
 from .utils import update_historical_stocks
 import json
 from machineLearning.predict import predictStock
+from django.db.models import Q
 
 class StockList(APIView):
 
@@ -318,7 +319,7 @@ class UpdateStock(APIView):
             return Response({'error': str(e)}, 400)
     
 class GetWatchedStocks(APIView):
-    permission_classes = (IsAuthenticated)
+    permission_classes = (IsAuthenticated, )
 
     def post(self, request):
         try:
@@ -358,17 +359,37 @@ class DeleteStockList(APIView):
             print(e)
             return Response({'error': str(e)}, 400)
 
-@api_view(['GET'])
+@api_view(['POST'])
 @authentication_classes([])
 @permission_classes([])
 def predict(request, format="json"):
-    if request.method == 'GET':
-        #ticker = request.data.get("ticker")
+    if request.method == 'POST':
+        ticker = request.data.get("ticker")
+        date = request.data.get("date")
         try: 
-            print(predictStock()) 
+            print(predictStock(ticker, date)) 
             return Response({}, 200)
         except Exception as e:
             print(e)
             return Response({'error': str(e)}, 400)
 
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def search(request, format="json"):
+    if request.method == 'POST':     
+        query = request.data.get("query")
+        try:
+            companies = SaphireCompany.objects.filter(Q(name__icontains=query) | Q(symbol__icontains=query)).distinct()
+            company_list = []
 
+            for company in companies:
+                serializer = CompanySerializer(company)
+                company_list.append(serializer.data)
+
+            json_str = json.dumps(company_list, ensure_ascii=False)
+            loadedJson = json.loads(json_str)
+            return Response(loadedJson, 200)
+        except Exception as e:
+            print(e)
+            return Response({'error': str(e)}, 400)
