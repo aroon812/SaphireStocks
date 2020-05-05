@@ -367,8 +367,9 @@ def predict(request, format="json"):
         ticker = request.data.get("ticker")
         date = request.data.get("date")
         try: 
-            print(predictStock(ticker, date)) 
-            return Response({}, 200)
+            output = predictStock(ticker, date)
+
+            return Response({'output': output}, 200)
         except Exception as e:
             print(e)
             return Response({'error': str(e)}, 400)
