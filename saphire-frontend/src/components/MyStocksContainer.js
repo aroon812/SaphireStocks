@@ -11,32 +11,44 @@ const removeStock = (ticker) => {
   console.log(ticker);
   var xmlHttp = new XMLHttpRequest();
 
-  xmlHttp.open("DELETE", "http://127.0.0.1:8000/api/watchStock/", false);
+  xmlHttp.open("DELETE", "http://129.114.16.219:8000/api/watchStock/", false);
   xmlHttp.setRequestHeader("Content-Type","application/json");
   xmlHttp.setRequestHeader("Authorization", "Token " + token);
   xmlHttp.send(JSON.stringify({ symbol: ticker }));
 
 }
 
-const addStock = () => {
-  
+const addStock = (ticker) => {
+  var token = localStorage.getItem("token");
+  console.log(ticker);
+  var xmlHttp = new XMLHttpRequest();
+
+  xmlHttp.open("POST", "http://129.114.16.219:8000/api/watchStock/", false);
+  xmlHttp.setRequestHeader("Content-Type","application/json");
+  xmlHttp.setRequestHeader("Authorization", "Token " + token);
+  xmlHttp.send(JSON.stringify({ symbol: ticker }));
 }
 
-export const MyStocksContainer = () => {
+export const MyStocksContainer = (props) => {
   const data = getWatchedStocksData();
 
   return (
     <div>
-      <Grid style={{ height: '325px' }} data={data}>
-        <Column field="Ticker" title="Ticker" width="100px" />
-        <Column field="PriceHistory" width="150px" cell={SparkLineChartCell} title="Price history" />
-        <Column field="Action" width="100px"
-          cell={(props) => (
-            <td>
-              <Button primary={true} onClick={() => removeStock(props['dataItem']['Ticker'])}>-</Button>
-            </td>
-          )} />
-      </Grid>
+      <div>
+        <Button primary={true} onClick={() => addStock(props.ticker)}>Add {props.name} to My Stocks</Button>
+      </div> 
+      <div>
+        <Grid style={{ height: '325px' }} data={data}>
+          <Column field="Ticker" title="Ticker" width="100px" />
+          <Column field="PriceHistory" width="150px" cell={SparkLineChartCell} title="Price history" />
+          <Column field="Action" width="100px"
+            cell={(props) => (
+              <td>
+                <Button primary={true} onClick={() => removeStock(props['dataItem']['Ticker'])}>-</Button>
+              </td>
+            )} />
+        </Grid>
+      </div>
     </div>
   );
 }

@@ -12,12 +12,17 @@ export const getWatchedStocksData = () => {
     return userStocks();
 }
 
+export const getMostRecent = (ticker) => {
+    return getMostRecent(ticker);
+}
+
 function userStocks() {
     var xmlHttp = new XMLHttpRequest();
     var token = localStorage.getItem("token");
     
-    xmlHttp.open("POST", "http://127.0.0.1:8000/api/watchedList/", false);
+    xmlHttp.open("POST", "http://129.114.16.219:8000/api/watchedList/", false);
     xmlHttp.setRequestHeader("Content-Type","application/json");
+    console.log("token " + token)
     xmlHttp.setRequestHeader("Authorization", "Token " + token);
     xmlHttp.send( null );
 
@@ -49,16 +54,12 @@ function userStocks() {
 function searchStock(ticker, from, to) {
     var token = localStorage.getItem("token");
     console.log("token " + token);
-    //var theUrl = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=' + ticker + '&outputsize=full&apikey=23V86RX6LO5AUIX4';
     var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "POST", 'http://127.0.0.1:8000/api/stocks/stockRange/', false ); // false for synchronous request
-    //xmlHttp.send( null );
-
+    
+    xmlHttp.open( "POST", 'http://129.114.16.219:8000/api/stocks/stockRange/', false ); // false for synchronous request
     xmlHttp.setRequestHeader("Content-Type","application/json");
     xmlHttp.setRequestHeader("Authorization", "Token " + token);
 
-    console.log(from);
-    console.log(to);
     xmlHttp.send(JSON.stringify({ ticker: ticker, low_date: formatDate(from) , high_date: formatDate(to) }));
     var json = JSON.parse(xmlHttp.responseText);
     
@@ -79,7 +80,6 @@ function massageData(obj) {
     result = result.trim();
     result = result.substring(0, result.length - 1); 
     result += "]";
-    console.log(result)
     JSON.parse(result);
     console.log("success");
     return JSON.parse(result);
@@ -113,3 +113,4 @@ function formatDate(date) {
 
     return [year, month, day].join('-');
 }
+

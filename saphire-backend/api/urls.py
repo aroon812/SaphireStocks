@@ -2,13 +2,13 @@ from django.urls import path
 from api import views
 from django.contrib.auth import views as auth_views
 from rest_framework.authtoken.views import obtain_auth_token
-from rest_framework_simplejwt import views as jwt_views
 
 urlpatterns = [
     path('stocks/', views.StockList.as_view(), name='stockList'),
     path('stocks/<int:pk>/', views.Stock.as_view(), name='stock'),
     path('stocks/stockRange/', views.stock_range, name='stockRange'),
     path('stocks/deleteList/', views.DeleteStockList.as_view(), name='deleteStocksList'),
+    path('stocks/recentInfo/', views.recent_stock_info, name='recentInfo'),
     path('stockChanges/', views.StockChangeList.as_view(), name='stockChangeList'),
     path('stockChanges/<int:pk>/', views.StockChange.as_view(), name='stockChange'),
     path('users/', views.UserList.as_view(),name='userList'),

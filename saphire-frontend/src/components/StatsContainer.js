@@ -1,22 +1,37 @@
 import React from 'react';
 
 import {Grid, GridColumn as Column } from '@progress/kendo-react-grid';
-import {getStockNews} from '../data/appData';
+import {getStockData} from '../data/appData';
 
+function getMostRecent(ticker) {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open("POST", "http://129.114.16.219:8000/api/stocks/recentInfo/", false);
+    xmlHttp.setRequestHeader("Content-Type","application/json");
+    xmlHttp.send(JSON.stringify({ ticker: ticker}));
+    var json = JSON.parse(xmlHttp.responseText);
+    return json;
+}
 
-export const StatsContainer = (prop) => (
-    <div className="col-12"> 
-        <div className="row"> 
-        
+export class StatsContainer extends React.Component{
+    constructor(props){
+        super(props);
+        this.state = {
+            ticker: props.ticker,
+            name: props.name,
+            now: new Date(Date.now()),
+        }
+    }
+    render() {
+        return (
+            <div className="col-12"> 
+            <div className="row"> 
+                <div className="col">
+                </div>
+            </div>
+            <div className="row">
+                <p>{getMostRecent(this.state.ticker)}</p> 
+            </div>
         </div>
-        <div className="row">
-            <Grid style={{ height: '300' }} data={getStockNews(prop.symbol)}>
-                <Column title="Percent Change (%)" field="urlToImage" width="150" cell="SampleText"/>
-                <Column title="Confidence (%)" field="urlToImage" width="200" cell="SampleText" />
-                <Column title="volatility (High/Low)" field="urlToImage" width="200" cell="SampleText" />
-                <Column title="Predicted Movement (+/-)" field="urlToImage" width="250" cell="SampleText" />
-                <Column title="Predicted Price ($)" field="urlToImage" width="175" cell="SampleText" />
-            </Grid>
-        </div>
-    </div>
-);
+        );
+    }
+}

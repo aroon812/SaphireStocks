@@ -6,8 +6,6 @@ import { Input } from '@progress/kendo-react-inputs';
 import { Button, ButtonGroup, Toolbar, ToolbarItem } from '@progress/kendo-react-buttons';
 import { Ripple } from '@progress/kendo-react-ripple';
 import { savePDF } from '@progress/kendo-react-pdf';
-import { TabStrip } from '@progress/kendo-react-layout';
-import { TabStripTab } from '@progress/kendo-react-layout';
 
 import Logo from './img/saphireLogo.png';
 
@@ -18,13 +16,24 @@ import { SignInInput } from './components/SignInInput';
 import { RegistrationInput } from './components/RegistrationInput';
 
 
-
-
-import ApexCharts from 'apexcharts'
 import '@progress/kendo-theme-material/dist/all.css';
 import './App.css';
 import 'bootstrap-4-grid/css/grid.min.css'; 
 import { TabsContainer } from './components/TabsContainer';
+
+
+function getName(symbol) {
+  var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", 'http://129.114.16.219:8000/api/companies/' + symbol + '/', false); // false for synchronous request
+    xmlHttp.setRequestHeader("Content-Type","application/json");
+    xmlHttp.send(JSON.stringify({ symbol: symbol }));
+   
+    if (xmlHttp.status===200){
+      var json = JSON.parse(xmlHttp.responseText);
+      return json['name'];
+    }
+    return null;
+}
 
 class App extends Component {
   constructor(props) {
@@ -38,6 +47,7 @@ class App extends Component {
       showLogin: false,
       showResgistration: false,
       selected: 0,
+      ticker: "A",
     }
   }
   
@@ -63,6 +73,8 @@ class App extends Component {
     }, () => console.log(this.state))
     this.handleLoginStateChange();
   }
+
+
 
   Header4 = (text) => (
     <h4>{text}</h4>
@@ -97,18 +109,18 @@ class App extends Component {
 
             <div className="row">
               <div className="col-8">
-                <StockChartContainer symbol='A' />
+                <StockChartContainer ticker={this.state.ticker} name={getName(this.state.ticker)}/>
 						  </div>
               <div className="col-4">
                 <h3>My Stocks</h3>
-								<MyStocksContainer />
+								<MyStocksContainer ticker={this.state.ticker} name={getName(this.state.ticker)}/>
               </div>
             </div>
 
             <div className="row">
               <div className="col-12">
                 <div>
-                  <TabsContainer />
+                  <TabsContainer ticker={this.state.ticker} name={getName(this.state.ticker)}/>
                 </div>
               </div>
 

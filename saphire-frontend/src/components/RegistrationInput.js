@@ -86,13 +86,13 @@ export class RegistrationInput extends React.Component{
       var email = this.state.email.toLowerCase();
       console.info('Valid Form');
       var xmlHttp = new XMLHttpRequest();
-      xmlHttp.open( "POST", 'http://127.0.0.1:8000/api/users/', false); // false for synchronous request
+      xmlHttp.open( "POST", 'http://129.114.16.219:8000/api/users/', false); // false for synchronous request
       xmlHttp.setRequestHeader("Content-Type","application/json");
       xmlHttp.send(JSON.stringify({ email: email, password: this.state.password, first_name: this.state.fName, last_name: this.state.lName }));
       
 
       if (xmlHttp.status===200){
-        xmlHttp.open( "POST", 'http://127.0.0.1:8000/api/api-token-auth/', false); // false for synchronous request
+        xmlHttp.open( "POST", 'http://129.114.16.219/api/api-token-auth/', false); // false for synchronous request
         xmlHttp.setRequestHeader("Content-Type","application/json");
         xmlHttp.send(JSON.stringify({ username: this.state.email, password: this.state.password }));
 

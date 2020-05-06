@@ -11,6 +11,8 @@ export class TabsContainer extends React.Component{
         super(props);
         this.state = {
             selected: 0,
+            ticker: props.ticker,
+            name: props.name,
         }
     }
 
@@ -25,14 +27,14 @@ export class TabsContainer extends React.Component{
     render(){
         return (
             <TabStrip  selected={this.state.selected} onSelect={this.handleSelect} >
-                <TabStripTab title={this.Header4("AI Insights")}>
-                    <PredictionContainer />
-                </TabStripTab>
                 <TabStripTab title={this.Header4("Statistics")}>
-                    <StatsContainer />
+                    <StatsContainer ticker={this.state.ticker} name={this.state.name}/>
+                </TabStripTab>
+                <TabStripTab title={this.Header4("AI Insights")}>
+                    <PredictionContainer ticker={this.state.ticker} name={this.state.name}/>
                 </TabStripTab>   
                 <TabStripTab title={this.Header4("News")}>
-                    <NewsContainer symbol="MSFT" />
+                    <NewsContainer ticker={this.state.ticker} name={this.state.name}/>
                 </TabStripTab>
             </TabStrip>
         );

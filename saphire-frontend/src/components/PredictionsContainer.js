@@ -21,8 +21,8 @@ export class PredictionContainer extends React.Component {
                 <div className="row">
                     <Grid style={{ height: '300' }} data={getStockNews(this.symbol)}>
                         <Column title="Percent Change (%)" field="urlToImage" width="150" cell="SampleText"/>
-                        <Column title="Confidence (%)" field="urlToImage" width="200" cell="SampleText" />
-                        <Column title="volatility (High/Low)" field="urlToImage" width="200" cell="SampleText" />
+                        <Column title="Confidence (High/Low)" field="urlToImage" width="200" cell="SampleText" />
+                        <Column title="volatility (%)" field="urlToImage" width="200" cell="SampleText" />
                         <Column title="Predicted Movement (+/-)" field="urlToImage" width="250" cell="SampleText" />
                         <Column title="Predicted Price ($)" field="urlToImage" width="175" cell="SampleText" />
                     </Grid>

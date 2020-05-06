@@ -348,10 +348,14 @@ class DeleteStockList(APIView):
         data = request.data
         
         try:
+            """
             date_to_delete = data.get("date")
             high = datetime.strptime(date_to_delete, '%Y-%m-%d')
             low = high - timedelta(days=10000)
+            
             stocks = SaphireStock.objects.filter(date__range=[low, high])
+            """
+            stocks = SaphireStock.objects.filter(company="AEH")
             stocks.delete()
             return Response({}, 200)
 
@@ -390,6 +394,32 @@ def search(request, format="json"):
 
             json_str = json.dumps(company_list, ensure_ascii=False)
             loadedJson = json.loads(json_str)
+            return Response(loadedJson, 200)
+        except Exception as e:
+            print(e)
+            return Response({'error': str(e)}, 400)
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def recent_stock_info(request, format="json"):
+    if request.method == 'POST':     
+        ticker = request.data.get("ticker")
+        try:
+            key = '23V86RX6LO5AUIX4'
+            ts = TimeSeries(key)
+            stock, meta = ts.get_intraday(symbol=ticker, interval='1min')
+            recent = list(stock)[0]
+            recent_data = {
+                'open': stock[recent]['1. open'],
+                'high': stock[recent]['2. high'],
+                'low': stock[recent]['3. low'],
+                'close': stock[recent]['4. close'],
+                'vol': stock[recent]['5. volume']
+            }
+            json_str = json.dumps(recent_data, ensure_ascii=False)
+            loadedJson = json.loads(json_str)
+
             return Response(loadedJson, 200)
         except Exception as e:
             print(e)
