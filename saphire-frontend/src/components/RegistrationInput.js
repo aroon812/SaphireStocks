@@ -92,7 +92,7 @@ export class RegistrationInput extends React.Component{
       
 
       if (xmlHttp.status===200){
-        xmlHttp.open( "POST", 'http://129.114.16.219/api/api-token-auth/', false); // false for synchronous request
+        xmlHttp.open( "POST", 'http://129.114.16.219:8000/api/api-token-auth/', false); // false for synchronous request
         xmlHttp.setRequestHeader("Content-Type","application/json");
         xmlHttp.send(JSON.stringify({ username: this.state.email, password: this.state.password }));
 

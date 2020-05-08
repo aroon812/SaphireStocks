@@ -8,6 +8,10 @@ export const getStockNews = (company) => {
     return searchNews(company);
 }
 
+export const getCompanyData = (query) => {
+    return searchResults(query)
+}
+
 export const getWatchedStocksData = () => {
     return userStocks();
 }
@@ -16,13 +20,25 @@ export const getMostRecent = (ticker) => {
     return getMostRecent(ticker);
 }
 
+function searchResults(query){
+    var xmlHttp = new XMLHttpRequest();
+    
+    xmlHttp.open("POST", "http://129.114.16.219:8000/api/search/", false);
+    xmlHttp.setRequestHeader("Content-Type","application/json");
+    xmlHttp.send( JSON.stringify({query: query}));
+
+    if (xmlHttp.status === 200){
+        var json = JSON.parse(xmlHttp.responseText);
+        return json['symbol'];
+    }
+}
+
 function userStocks() {
     var xmlHttp = new XMLHttpRequest();
     var token = localStorage.getItem("token");
     
     xmlHttp.open("POST", "http://129.114.16.219:8000/api/watchedList/", false);
     xmlHttp.setRequestHeader("Content-Type","application/json");
-    console.log("token " + token)
     xmlHttp.setRequestHeader("Authorization", "Token " + token);
     xmlHttp.send( null );
 
@@ -48,12 +64,10 @@ function userStocks() {
         }
         return data;
     }
-    
 }
 
 function searchStock(ticker, from, to) {
     var token = localStorage.getItem("token");
-    console.log("token " + token);
     var xmlHttp = new XMLHttpRequest();
     
     xmlHttp.open( "POST", 'http://129.114.16.219:8000/api/stocks/stockRange/', false ); // false for synchronous request
@@ -81,7 +95,6 @@ function massageData(obj) {
     result = result.substring(0, result.length - 1); 
     result += "]";
     JSON.parse(result);
-    console.log("success");
     return JSON.parse(result);
 }
 

@@ -11,7 +11,6 @@ import {
 } from "@progress/kendo-react-charts";
 import { IntlService } from '@progress/kendo-react-intl';
 import { filterBy } from '@progress/kendo-data-query';
-import { Button, ButtonGroup, Toolbar, ToolbarItem } from '@progress/kendo-react-buttons';
 import "hammerjs";
 import {getStockData} from '../data/appData';
 
@@ -25,6 +24,8 @@ const intl = new IntlService('en');
 function mapper(data) {
   return data.map(item => (Object.assign({}, item, { Date: intl.parseDate(item.Date)})));
 }
+
+
 
 
 export class StockChartContainer extends React.Component {
@@ -43,8 +44,29 @@ export class StockChartContainer extends React.Component {
     }
   }
 
- 
+  updateData = () => {
+    console.log(this.state.ticker);
+    const data = getStockData(this.state.ticker, fromU, toU);
+    const stockData = mapper(data);
+    this.state = {
+      seriesData: Array.from(stockData),
+      navigatorData: Array.from(stockData),
+      selected: 0,
+      to: toU,
+      from: fromU,
+    }
+  }
 
+  componentWillReceiveProps(props){
+    if (props.ticker !== this.state.ticker && props.name !== this.state.name){
+    this.setState({
+      ticker: props.ticker, 
+      name: props.name
+    }, () => this.updateData());
+  }
+  }
+
+  
   render() {
     const { seriesData, navigatorData } = this.state;
     return (

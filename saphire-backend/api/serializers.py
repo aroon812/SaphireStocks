@@ -30,7 +30,11 @@ class StockSerializer(serializers.ModelSerializer):
             close=validated_data['close']
         )
         stock.save()
+        print("test1")
+        print(stock.date)
         newStock = Stock.objects.get(date=stock.date, company=stock.company) 
+        print("test2")
+
         fillStockFields(newStock, newStock.company)
         return stock
     

@@ -12,9 +12,10 @@ import Logo from './img/saphireLogo.png';
 
 import { StockChartContainer } from './components/StockChartContainer';
 import { MyStocksContainer } from './components/MyStocksContainer';
+import { SearchInput } from './components/SearchInput'
 import { SignInInput } from './components/SignInInput';
 import { RegistrationInput } from './components/RegistrationInput';
-
+import { getCompanyData } from './data/appData'
 
 import '@progress/kendo-theme-material/dist/all.css';
 import './App.css';
@@ -41,6 +42,13 @@ class App extends Component {
     this.appContainer = React.createRef();
     this.handleLoginStateChange = this.handleLoginStateChange.bind(this);
     this.handleRegistrationStateChange = this.handleRegistrationStateChange.bind(this);
+    var signedIn = false;
+    if (localStorage.getItem("token") == "base"){
+      signedIn = false;
+    }
+    else{
+      signedIn = true;
+    }
 
     this.state = {
       showDialog: false,
@@ -48,9 +56,10 @@ class App extends Component {
       showResgistration: false,
       selected: 0,
       ticker: "A",
+      loggedIn: signedIn
     }
   }
-  
+
   handlePDFExport = () => {
     savePDF(ReactDOM.findDOMNode(this.appContainer), { paperSize: 'auto' });
   }
@@ -59,6 +68,34 @@ class App extends Component {
     this.setState({
       showDialog: !this.state.showDialog
     }, () => console.log(this.state))
+  }
+
+  handleQueryChange = event => {
+    console.log(event);
+    this.setState({ 
+      [event.target.name]: event.target.value,
+    });
+  }
+
+  handleSearch = () => {
+    var ticker = getCompanyData(this.state.query);
+    this.setState({
+      ticker: ticker
+    }, () => this.forceUpdate());
+  }
+
+  handleSignIn = () => {
+    this.handleLoginStateChange();
+    this.setState({
+      loggedIn: true
+    });
+  }
+
+  handleSignOut = () => {
+    localStorage.setItem("token", "base");
+    this.setState({
+      loggedIn: false
+    });
   }
 
   handleLoginStateChange = () => {
@@ -97,11 +134,19 @@ class App extends Component {
                   <Toolbar className="float-right d-flex">
                     <ToolbarItem className="float-right d-flex">
                       <div className="littleSearchBar">
-                        <Input label="Search..." />
+                      <Input label="Search..." name="query" value={this.state.query} onChange={this.handleQueryChange}/>
                       </div>
+                      <Button className="float-right" onClick={this.handleSearch}>Search</Button> 
                       <Button className="float-right" onClick={this.handlePDFExport}>Export as PDF</Button>               
                       <Button className="float-right" onClick={this.handleShare}>Share</Button> 
-                      <Button className="float-right" onClick={this.handleLoginStateChange}>Sign In</Button>
+                      {
+                        this.state.loggedIn == false &&
+                        <Button className="float-right" onClick={this.handleSignIn}>Sign In</Button> 
+                        ||
+                        this.state.loggedIn == true &&
+                        <Button className="float-right" onClick={this.handleSignOut}>Log Out</Button>
+                        
+                      } 
                     </ToolbarItem>
                   </Toolbar>
 							</div>
@@ -111,10 +156,17 @@ class App extends Component {
               <div className="col-8">
                 <StockChartContainer ticker={this.state.ticker} name={getName(this.state.ticker)}/>
 						  </div>
+              { this.state.loggedIn == true &&
               <div className="col-4">
                 <h3>My Stocks</h3>
 								<MyStocksContainer ticker={this.state.ticker} name={getName(this.state.ticker)}/>
+              </div> 
+              || this.state.loggedIn == false &&
+              <div className="col-4">
+                <h3>About Saphire</h3>
+                <p> saphire is cool </p>
               </div>
+              }
             </div>
 
             <div className="row">

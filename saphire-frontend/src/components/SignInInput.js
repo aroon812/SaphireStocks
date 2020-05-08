@@ -26,8 +26,6 @@ handleLogin = () => {
         email: "",
         password: "",
       }, () => this.props.handleLoginStateChange());
-      //localStorage.setItem("refreshToken", json['refresh']);
-      //localStorage.setItem("accessToken", json['access']);
       localStorage.setItem("token", json['token']);
     }
   }

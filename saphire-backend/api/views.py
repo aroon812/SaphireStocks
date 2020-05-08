@@ -10,10 +10,10 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from alpha_vantage.timeseries import TimeSeries
 from datetime import datetime, timedelta
 from rest_framework.decorators import authentication_classes, permission_classes, api_view
-from .utils import update_historical_stocks
+from .utils import update_historical_stocks, current_day_info, update_stock
 import json
 from machineLearning.predict import predictStock
-from django.db.models import Q
+from django.db.models import Q, Max
 
 class StockList(APIView):
 
@@ -157,15 +157,20 @@ def stock_range(request, format="json"):
         low_date = request.data.get("low_date")
         high_date = request.data.get("high_date")
         try:
-            company = SaphireCompany.objects.get(symbol=ticker)
-            stock_days = SaphireStock.objects.filter(company=company, date__range=[low_date, high_date])
+            stock_days = SaphireStock.objects.filter(company=ticker, date__range=[low_date, high_date]).values()
             stock_dict = {}
             day_list = []
-
-            for day in stock_days:
-                serializer = StockSerializer(day)
-                day_list.append(serializer.data)
-
+            
+            for day in stock_days.iterator():
+                day_list.append({
+                        'date': str(day['date']),
+                        'open': float(day['open']),
+                        'close': float(day['close']),
+                        'high': float(day['high']),
+                        'low': float(day['low']),
+                        'vol': day['vol'] 
+                })
+            
             json_str = json.dumps(day_list, ensure_ascii=False)
             loadedJson = json.loads(json_str)
             return Response(loadedJson, 200)
@@ -355,7 +360,7 @@ class DeleteStockList(APIView):
             
             stocks = SaphireStock.objects.filter(date__range=[low, high])
             """
-            stocks = SaphireStock.objects.filter(company="AEH")
+            stocks = SaphireStock.objects.filter(company="XOM")
             stocks.delete()
             return Response({}, 200)
 
@@ -385,14 +390,17 @@ def search(request, format="json"):
     if request.method == 'POST':     
         query = request.data.get("query")
         try:
+            """
             companies = SaphireCompany.objects.filter(Q(name__icontains=query) | Q(symbol__icontains=query)).distinct()
             company_list = []
 
             for company in companies:
                 serializer = CompanySerializer(company)
                 company_list.append(serializer.data)
-
-            json_str = json.dumps(company_list, ensure_ascii=False)
+            """
+            company = SaphireCompany.objects.get(Q(name=query) | Q(symbol=query))
+            serializer = CompanySerializer(company)
+            json_str = json.dumps(serializer.data, ensure_ascii=False)
             loadedJson = json.loads(json_str)
             return Response(loadedJson, 200)
         except Exception as e:
@@ -406,18 +414,8 @@ def recent_stock_info(request, format="json"):
     if request.method == 'POST':     
         ticker = request.data.get("ticker")
         try:
-            key = '23V86RX6LO5AUIX4'
-            ts = TimeSeries(key)
-            stock, meta = ts.get_intraday(symbol=ticker, interval='1min')
-            recent = list(stock)[0]
-            recent_data = {
-                'open': stock[recent]['1. open'],
-                'high': stock[recent]['2. high'],
-                'low': stock[recent]['3. low'],
-                'close': stock[recent]['4. close'],
-                'vol': stock[recent]['5. volume']
-            }
-            json_str = json.dumps(recent_data, ensure_ascii=False)
+            recent_info = current_day_info(ticker)
+            json_str = json.dumps(recent_info, ensure_ascii=False)
             loadedJson = json.loads(json_str)
 
             return Response(loadedJson, 200)

@@ -13,14 +13,17 @@ h3 {
   font-weight: bold;
 }
 
-h4 {
-  color:rgb(63, 81, 181);
+h3.black {
+  color: black;
   font-weight: bold;
 }
 
-h5 {
-  color:rgb(63, 81, 181);
-  font-weight: bold;
+div.-centerSpace {
+  align-content: flex-start;
+  align-self: flex-end;
+  display: inline;
+  padding: 5%;
+  border: black;
 }
 
 .error {

@@ -8,14 +8,12 @@ const SparkLineChartCell = (props) => <td><Sparkline data={props.dataItem.PriceH
 
 const removeStock = (ticker) => {
   var token = localStorage.getItem("token");
-  console.log(ticker);
   var xmlHttp = new XMLHttpRequest();
 
   xmlHttp.open("DELETE", "http://129.114.16.219:8000/api/watchStock/", false);
   xmlHttp.setRequestHeader("Content-Type","application/json");
   xmlHttp.setRequestHeader("Authorization", "Token " + token);
   xmlHttp.send(JSON.stringify({ symbol: ticker }));
-
 }
 
 const addStock = (ticker) => {

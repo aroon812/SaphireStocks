@@ -1,16 +1,41 @@
 from .models import Stock, StockChange, Company
 from django.db.models import Avg, Max, Min, StdDev
 from decimal import Decimal
-import datetime
-from alpha_vantage.timeseries import TimeSeries          
+#from .utils import get_past_days
+import datetime       
+
+def get_past_days(num_days, date, ticker):
+    
+    start_date = date - datetime.timedelta(days=num_days)
+    stocks = Stock.objects.filter(company=ticker, date__range=[start_date, date])
+    days = num_days
+    while len(stocks) < num_days:
+        start_date = date - datetime.timedelta(days=days)
+        stocks = Stock.objects.filter(company=ticker, date__range=[start_date, date])
+        days += 1
+    return stocks
+    
+    """
+    start_date = date - datetime.timedelta(days=100000)
+    stocks = Stock.objects.filter(company=ticker, date__range=[start_date, date])[:10][::-1]
+    pk_list = [stock.pk for stock in stocks]
+    return Stock.objects.filter(pk__in=pk_list)
+    """
 
 def fillStockFields(stock, company):
     date = stock.date
-    prev_date = stock.date - datetime.timedelta(days=1)
+    prev_date = stock.date - datetime.timedelta(days=2)
     
     try:
-        prev_stock = Stock.objects.get(company=company, date=prev_date)
+        #prev_stock = Stock.objects.get(company=company, date=prev_date)
+        print(date)
+        temp_stock_list = get_past_days(2, date, company.symbol)
+        print(len(temp_stock_list))
+        prev_stock = temp_stock_list[0]
+        print(prev_stock)
+        
     except Stock.DoesNotExist:
+        print("dne")
         prev_stock = None
     
     calc_range(stock)
@@ -22,29 +47,6 @@ def fillStockFields(stock, company):
     calc_vol_ema(stock, prev_stock, company)
     calc_52_day_metrics(stock, date, company)
     calc_52_week_metrics(stock, date, company)
-    """
-    print("vol: " + str(stock.vol) + " type: " + str(type(stock.vol)))
-    print("high: " + str(stock.high) + " type: " + str(type(stock.high)))
-    print("low: " + str(stock.low) + " type: " + str(type(stock.low)))
-    print("open: " + str(stock.open) + " type: " + str(type(stock.open)))
-    print("close: " + str(stock.close) + " type: " + str(type(stock.close)))
-    print("avg: " + str(stock.avg) + " type: " + str(type(stock.avg)))
-    print("range: " + str(stock.range) + " type: " + str(type(stock.range)))
-    print("single_day_change: " + str(stock.single_day_change) + " type: " + str(type(stock.single_day_change)))
-    print("day_to_day_change: " + str(stock.day_to_day_change) + " type: " + str(type(stock.day_to_day_change)))
-    print("ema_12_day: " + str(stock.ema_12_day) + " type: " + str(type(stock.ema_12_day)))
-    print("ema_26_day: " + str(stock.ema_26_day) + " type: " + str(type(stock.ema_26_day)))
-    print("vol_ema: " + str(stock.vol_ema) + " type: " + str(type(stock.vol_ema)))
-    print("vol_avg_52_week: " + str(stock.vol_avg_52_week) + " type: " + str(type(stock.vol_avg_52_week)))
-    print("high_52_day: " + str(stock.high_52_day) + " type: " + str(type(stock.high_52_day)))
-    print("high_52_week: " + str(stock.high_52_week) + " type: " + str(type(stock.high_52_week)))
-    print("low_52_day: " + str(stock.low_52_day) + " type: " + str(type(stock.low_52_day)))
-    print("low_52_week: " + str(stock.low_52_week) + " type: " + str(type(stock.low_52_week)))
-    print("avg_52_day: " + str(stock.avg_52_day) + " type: " + str(type(stock.avg_52_day)))
-    print("avg_52_week: " + str(stock.avg_52_week) + " type: " + str(type(stock.avg_52_week)))
-    print("stdev_52_day: " + str(stock.stdev_52_day) + " type: " + str(type(stock.stdev_52_day)))
-    print("stdev_52_week: " + str(stock.stdev_52_week) + " type: " + str(type(stock.stdev_52_week)))
-    """
     stock.save()
     normalize_stock(stock)
 
@@ -106,7 +108,7 @@ def calc_52_day_metrics(stock, end_date, company):
     if stdev_result_set['close__stddev'] is not None:
         stock.stdev_52_day = round(stdev_result_set['close__stddev'], 4)
     else:
-        stock.stdev_52_day = round(stock.close, 4)
+        stock.stdev_52_day = 0
 
 def calc_52_week_metrics(stock, end_date, company):
     start_date = end_date - datetime.timedelta(days=365)
@@ -136,7 +138,7 @@ def calc_52_week_metrics(stock, end_date, company):
     if stdev_result_set['close__stddev'] is not None:
         stock.stdev_52_week = round(stdev_result_set['close__stddev'], 4)
     else:
-        stock.stdev_52_week = round(stock.close, 4)
+        stock.stdev_52_week = 0
 
     if vol_result_set['vol__avg'] is not None:
         stock.vol_avg_52_week = round(Decimal(vol_result_set['vol__avg']), 4)

@@ -3,16 +3,82 @@ from celery import task
 from alpha_vantage.timeseries import TimeSeries
 from .models import Stock, StockChange, Company
 from .serializers import StockSerializer
+from django.db.models import Max, Min
+import statistics
 import pandas
 import numpy
 from datetime import datetime, timedelta
+from .stockUtils import get_past_days
 import redis
 
 key = '23V86RX6LO5AUIX4'
 ts = TimeSeries(key)
 
+
+
+def current_day_info(ticker):
+    stock, meta = ts.get_intraday(symbol=ticker, interval='1min')
+    recent = list(stock)[0]
+    stocks = Stock.objects.filter(company=ticker)
+    recent_date = stocks.aggregate(Max('date'))
+    date_str = recent_date['date__max']
+    prev_stock = Stock.objects.get(company=ticker, date=date_str)
+    high = float(stock[recent]['2. high'])
+    low = float(stock[recent]['3. low'])
+    close = float(stock[recent]['4. close'])
+    volume = float(stock[recent]['5. volume'])
+    percent_change = ((float(stock[recent]['4. close']) - float(prev_stock.close))/float(prev_stock.close)) * 100
+    day_range = float(stock[recent]['2. high']) - float(stock[recent]['3. low'])
+    
+    if high > float(prev_stock.high_52_day):
+        high_52_day = high
+    else:
+        high_52_day = float(prev_stock.high_52_day)
+    if low < float(prev_stock.high_52_day):
+        low_52_day = low
+    else:
+        low_52_day = float(prev_stock.low_52_day)
+    
+    avg = (high + low + close)/3
+    range_52_day = high_52_day - low_52_day
+    ema_12_day = (avg*.15) + (float(prev_stock.avg)*.85)
+    ema_26_day = (avg*.075) + (float(prev_stock.avg)*.925)
+    start_date = date_str - timedelta(days=20)
+    last_20_days = Stock.objects.filter(company=ticker, date__range=[start_date, date_str])
+    closes = []
+    for day in last_20_days:
+        closes.append(float(day.close))
+    closes.append(close)
+    stdev_20_day = statistics.stdev(closes)
+
+    
+    oscillator_stocks = get_past_days(14, date_str, ticker)
+    high_result_set = oscillator_stocks.aggregate(Max('high'))
+    low_result_set = oscillator_stocks.aggregate(Min('low'))
+    high_14_day = float(high_result_set['high__max'])
+    low_14_day = float(low_result_set['low__min'])
+    stochastic_oscillator = ((close - low_14_day)/(high_14_day - low_14_day))*100
+
+    recent_data = {
+        'current_price' : close,
+        'previous_close': float(prev_stock.close),
+        'open': float(stock[recent]['1. open']),
+        'percent_change': percent_change,
+        'range': day_range,
+        '52_day_range': range_52_day,
+        '52_day_high': high_52_day,
+        '52_day_low': low_52_day,
+        'vol': int(stock[recent]['5. volume']),
+        '12_day_ema': ema_12_day,
+        '26_day_ema': ema_26_day,
+        '20_day_stdev': stdev_20_day,
+        'stochastic_oscillator': stochastic_oscillator
+    }
+
+    return recent_data
+
 def update_historical_stocks():
-    names = pandas.read_csv('api/namesData/stock_names.csv')
+    names = pandas.read_csv('api/namesData/100_names_data.csv')
     with open('/home/stockteam/saphire/saphire-backend/api/update_file.txt', 'r') as progress_file:
             tickers_list = progress_file.read().splitlines()
             progress_file.close()
@@ -74,7 +140,6 @@ def update_stock(symbol, name):
         try:
             create_company(symbol, name)
             stock, meta = ts.get_daily(symbol=symbol)
-            print(stock)
             recent_date = list(stock)[0]
             stock_dict = dict(stock[recent_date])
             validated_data = {
@@ -90,15 +155,6 @@ def update_stock(symbol, name):
             serializer = StockSerializer(data=validated_data)
             if serializer.is_valid():
                 serializer.save()
-                    
-            """
-            company = Company.objects.get(symbol=symbol)
-            stock = Stock.objects.create(company=company, date=recent_date, open=stock_dict['1. open'], high=stock_dict[
-                                        '2. high'], low=stock_dict['3. low'], close=stock_dict['4. close'], vol=stock_dict['5. volume'], avg=0)
-            stock.save()
-            calc_52_day_average(symbol=symbol, date=recent_date)
-            calc_percent_changes(symbol=symbol, date=recent_date)
-            """
             
         except Exception as e:
                 print(e)
