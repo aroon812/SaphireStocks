@@ -3,12 +3,12 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { Dialog, DialogActionsBar } from '@progress/kendo-react-dialogs';
 import { Input } from '@progress/kendo-react-inputs'; 
-import { Button, ButtonGroup, Toolbar, ToolbarItem } from '@progress/kendo-react-buttons';
+import { Button, Toolbar, ToolbarItem } from '@progress/kendo-react-buttons';
 import { Ripple } from '@progress/kendo-react-ripple';
 import { savePDF } from '@progress/kendo-react-pdf';
 
 import Logo from './img/saphireLogo.png';
-
+import saphireLogo2 from './img/saphireLogo2.png';
 
 import { StockChartContainer } from './components/StockChartContainer';
 import { MyStocksContainer } from './components/MyStocksContainer';
@@ -36,6 +36,7 @@ function getName(symbol) {
     return null;
 }
 
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -43,7 +44,7 @@ class App extends Component {
     this.handleLoginStateChange = this.handleLoginStateChange.bind(this);
     this.handleRegistrationStateChange = this.handleRegistrationStateChange.bind(this);
     var signedIn = false;
-    if (localStorage.getItem("token") == "base"){
+    if (localStorage.getItem("token") === "base"){
       signedIn = false;
     }
     else{
@@ -62,6 +63,18 @@ class App extends Component {
 
   handlePDFExport = () => {
     savePDF(ReactDOM.findDOMNode(this.appContainer), { paperSize: 'auto' });
+  }
+
+  searchCallBack = (searchResults) => {
+    console.log(searchResults);
+    if (searchResults == null){
+      alert("Stock does not exist!");
+    }
+    else{
+    this.setState({
+      ticker: searchResults
+    })
+  }
   }
 
   handleShare = () => {
@@ -86,15 +99,19 @@ class App extends Component {
 
   handleSignIn = () => {
     this.handleLoginStateChange();
-    this.setState({
-      loggedIn: true
-    });
   }
 
   handleSignOut = () => {
     localStorage.setItem("token", "base");
     this.setState({
       loggedIn: false
+    });
+  }
+
+  handleSuccessfulSignIn = () => {
+    this.setState({
+      loggedIn: true,
+      showLogin: !this.state.showLogin
     });
   }
 
@@ -110,8 +127,13 @@ class App extends Component {
     }, () => console.log(this.state))
     this.handleLoginStateChange();
   }
-
-
+//<Button className="float-right" onClick={this.handleSearch}>Search</Button> 
+/*
+<div className="littleSearchBar">
+<Input label="Search..." name="query" value={this.state.query} onChange={this.handleQueryChange}/>
+</div>
+<Button className="float-right" onClick={this.handleSearch}>Search</Button> 
+*/
 
   Header4 = (text) => (
     <h4>{text}</h4>
@@ -127,24 +149,21 @@ class App extends Component {
             <div className="row">
 							<div className="col-sm-6">
                 <div className="row-xs">
-                  <img src={Logo} alt="Logo" width="325" height="85" />
+                  <img src={Logo} alt="UpperLogo" width="325" height="85" />
                 </div>
 						  </div>
 							<div className="col-sm-6 buttons-right">
                   <Toolbar className="float-right d-flex">
                     <ToolbarItem className="float-right d-flex">
-                      <div className="littleSearchBar">
-                      <Input label="Search..." name="query" value={this.state.query} onChange={this.handleQueryChange}/>
-                      </div>
-                      <Button className="float-right" onClick={this.handleSearch}>Search</Button> 
+                      <SearchInput callback={this.searchCallBack}/>
                       <Button className="float-right" onClick={this.handlePDFExport}>Export as PDF</Button>               
                       <Button className="float-right" onClick={this.handleShare}>Share</Button> 
                       {
-                        this.state.loggedIn == false &&
-                        <Button className="float-right" onClick={this.handleSignIn}>Sign In</Button> 
+                        (this.state.loggedIn === false &&
+                        <Button className="float-right" onClick={this.handleLoginStateChange}>Sign In</Button>) 
                         ||
-                        this.state.loggedIn == true &&
-                        <Button className="float-right" onClick={this.handleSignOut}>Log Out</Button>
+                        (this.state.loggedIn === true &&
+                        <Button className="float-right" onClick={this.handleSignOut}>Log Out</Button>)
                         
                       } 
                     </ToolbarItem>
@@ -156,16 +175,32 @@ class App extends Component {
               <div className="col-8">
                 <StockChartContainer ticker={this.state.ticker} name={getName(this.state.ticker)}/>
 						  </div>
-              { this.state.loggedIn == true &&
+              { (this.state.loggedIn === true &&
               <div className="col-4">
                 <h3>My Stocks</h3>
 								<MyStocksContainer ticker={this.state.ticker} name={getName(this.state.ticker)}/>
-              </div> 
-              || this.state.loggedIn == false &&
+              </div>) 
+              || (this.state.loggedIn === false &&
               <div className="col-4">
-                <h3>About Saphire</h3>
-                <p> saphire is cool </p>
+                <h3>About Saphire:</h3>
+                < div className="memo">
+                  <div className="stockName">
+                    <img src={saphireLogo2} alt="Logo" width="175" height="175" />
+                  </div>
+                  <h5> 
+                    &emsp;Saphire is a financial data center similar to Yahoo Finance or Google
+                    Finance. Saphire provides graphics, statistics, and news about all the
+                    Fortune 100 companies' allowing users to stay up-to-date on their
+                    stocks. Additionally, Saphire uses artificial intelligence to predict
+                    changes in prices, closing prices, and booms for companies. Join today
+                    and make some money!
+                  </h5>
+                  <div className="stockName">
+                    <h5>- Jewell Day, Lukas Jimenez-Smith,<br /> Brody Pearman, and Aaron Thompson </h5>
+                  </div>
+                </div>
               </div>
+              )
               }
             </div>
 
@@ -188,7 +223,7 @@ class App extends Component {
 							</Dialog>
 						}
             {this.state.showLogin &&
-							<SignInInput handleLoginStateChange = {this.handleLoginStateChange} handleRegistrationStateChange = {this.handleRegistrationStateChange}/>
+							<SignInInput handleLoginStateChange = {this.handleLoginStateChange} handleRegistrationStateChange = {this.handleRegistrationStateChange} handleSuccessfulSignIn = {this.handleSuccessfulSignIn}/>
 						}
             {this.state.showResgistration &&
               <RegistrationInput handleRegistrationStateChange = {this.handleRegistrationStateChange} />

@@ -376,9 +376,47 @@ def predict(request, format="json"):
         ticker = request.data.get("ticker")
         date = request.data.get("date")
         try: 
-            output = predictStock(ticker, date)
+            key = '23V86RX6LO5AUIX4'
+            ts = TimeSeries(key)
+            stocks = SaphireStock.objects.filter(company=ticker)
+            stock, meta = ts.get_intraday(symbol=ticker, interval='1min')
+            recent = list(stock)[0]
+            
+            recent_date = stocks.aggregate(Max('date'))
+            date_str = recent_date['date__max']
+            close = float(stock[recent]['4. close'])
 
-            return Response({'output': output}, 200)
+            stocks = SaphireStock.objects.filter(company=ticker)
+            date_str = recent_date['date__max']
+            prev_stock = SaphireStock.objects.get(company=ticker, date=date_str)
+            predictions = predictStock(ticker, date)
+            percentage_change = predictions[0] 
+            projected_price = (percentage_change+1)*float(prev_stock.close)
+            if percentage_change < 0:
+                directional_prediction = '-'
+            else:
+                directional_prediction = '+'
+
+            if predictions[1][0] == 0:
+                five_day_boom = 'False'
+            else:
+                five_day_boom = 'True'
+            
+            five_day_boom_confidence = predictions[1][1]
+            print(percentage_change)
+            predict_dict = {
+                'last_day_close': float(prev_stock.close),
+                'current_price': close,
+                'percentage_change': percentage_change*100,
+                'projected_price': projected_price,
+                'directional_prediction': directional_prediction,
+                'five_day_boom': five_day_boom,
+                'five_day_boom_confidence': five_day_boom_confidence
+            }
+
+            json_str = json.dumps(predict_dict, ensure_ascii=False)
+            loadedJson = json.loads(json_str)
+            return Response(loadedJson, 200)
         except Exception as e:
             print(e)
             return Response({'error': str(e)}, 400)
@@ -389,17 +427,20 @@ def predict(request, format="json"):
 def search(request, format="json"):
     if request.method == 'POST':     
         query = request.data.get("query")
+        
         try:
             """
             companies = SaphireCompany.objects.filter(Q(name__icontains=query) | Q(symbol__icontains=query)).distinct()
             company_list = []
-
             for company in companies:
+                print(company)
                 serializer = CompanySerializer(company)
                 company_list.append(serializer.data)
+           
             """
             company = SaphireCompany.objects.get(Q(name=query) | Q(symbol=query))
             serializer = CompanySerializer(company)
+            
             json_str = json.dumps(serializer.data, ensure_ascii=False)
             loadedJson = json.loads(json_str)
             return Response(loadedJson, 200)
@@ -417,6 +458,23 @@ def recent_stock_info(request, format="json"):
             recent_info = current_day_info(ticker)
             json_str = json.dumps(recent_info, ensure_ascii=False)
             loadedJson = json.loads(json_str)
+
+            return Response(loadedJson, 200)
+        except Exception as e:
+            print(e)
+            return Response({'error': str(e)}, 400)
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def delete_duplicates(request, format="json"):
+    if request.method == 'POST':     
+        try:
+            for row in SaphireStock.objects.all():
+                print(row)
+                if SaphireStock.objects.filter(company=row.company, date=row.date).count() > 1:
+                    row.delete()
+                    print("duplicate deleted")
 
             return Response(loadedJson, 200)
         except Exception as e:

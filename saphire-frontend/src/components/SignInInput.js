@@ -1,7 +1,7 @@
 import React from "react";
 import { Dialog, DialogActionsBar } from '@progress/kendo-react-dialogs';
 import { Input } from '@progress/kendo-react-inputs'; 
-import { Button, ButtonGroup, Toolbar, ToolbarItem } from '@progress/kendo-react-buttons';
+import { Button } from '@progress/kendo-react-buttons';
 
 export class SignInInput extends React.Component{
     constructor(props) {
@@ -18,15 +18,18 @@ handleLogin = () => {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.open( "POST", 'http://129.114.16.219:8000/api/api-token-auth/', false); // false for synchronous request
     xmlHttp.setRequestHeader("Content-Type","application/json");
-    xmlHttp.send(JSON.stringify({ username: this.state.email, password: this.state.password }));
+    xmlHttp.send(JSON.stringify({ username: this.state.email.toLowerCase(), password: this.state.password }));
    
     if (xmlHttp.status===200){
       var json = JSON.parse(xmlHttp.responseText);
       this.setState({
         email: "",
         password: "",
-      }, () => this.props.handleLoginStateChange());
+      }, () => this.props.handleSuccessfulSignIn());
       localStorage.setItem("token", json['token']);
+    }
+    else if (xmlHttp.status===400){
+      alert("invalid login credentials");
     }
   }
   

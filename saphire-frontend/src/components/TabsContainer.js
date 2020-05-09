@@ -16,6 +16,12 @@ export class TabsContainer extends React.Component{
         }
     }
 
+    componentWillReceiveProps(nextProps) {
+        this.setState({ selected: this.state.selected,
+                        ticker: nextProps.ticker,
+                        name: nextProps.name, });  
+    }   
+
     handleSelect = (e) => {
         this.setState({selected: e.selected})
     }
@@ -27,11 +33,11 @@ export class TabsContainer extends React.Component{
     render(){
         return (
             <TabStrip  selected={this.state.selected} onSelect={this.handleSelect} >
-                <TabStripTab title={this.Header4("Statistics")}>
-                    <StatsContainer ticker={this.state.ticker} name={this.state.name}/>
-                </TabStripTab>
                 <TabStripTab title={this.Header4("AI Insights")}>
                     <PredictionContainer ticker={this.state.ticker} name={this.state.name}/>
+                </TabStripTab>
+                <TabStripTab title={this.Header4("Statistics")}>
+                    <StatsContainer ticker={this.state.ticker} name={this.state.name}/>
                 </TabStripTab>   
                 <TabStripTab title={this.Header4("News")}>
                     <NewsContainer ticker={this.state.ticker} name={this.state.name}/>

@@ -20,6 +20,8 @@ class StockSerializer(serializers.ModelSerializer):
     company = serializers.PrimaryKeyRelatedField(queryset=Company.objects.all())
 
     def create(self, validated_data):
+        if Stock.objects.filter(date=validated_data['date'], company=validated_data['company']).exists():
+            raise Exception("stock already exists")
         stock = Stock.objects.create(
             company=validated_data['company'],
             date=validated_data['date'],
@@ -29,12 +31,10 @@ class StockSerializer(serializers.ModelSerializer):
             open=validated_data['open'],
             close=validated_data['close']
         )
-        stock.save()
-        print("test1")
+        
+        stock.save() 
         print(stock.date)
         newStock = Stock.objects.get(date=stock.date, company=stock.company) 
-        print("test2")
-
         fillStockFields(newStock, newStock.company)
         return stock
     

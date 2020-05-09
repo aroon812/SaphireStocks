@@ -20,9 +20,12 @@ def current_day_info(ticker):
     stock, meta = ts.get_intraday(symbol=ticker, interval='1min')
     recent = list(stock)[0]
     stocks = Stock.objects.filter(company=ticker)
+    
     recent_date = stocks.aggregate(Max('date'))
     date_str = recent_date['date__max']
     prev_stock = Stock.objects.get(company=ticker, date=date_str)
+    print(prev_stock.low_52_week)
+    
     high = float(stock[recent]['2. high'])
     low = float(stock[recent]['3. low'])
     close = float(stock[recent]['4. close'])
@@ -44,21 +47,26 @@ def current_day_info(ticker):
     ema_12_day = (avg*.15) + (float(prev_stock.avg)*.85)
     ema_26_day = (avg*.075) + (float(prev_stock.avg)*.925)
     start_date = date_str - timedelta(days=20)
-    last_20_days = Stock.objects.filter(company=ticker, date__range=[start_date, date_str])
+    #last_20_days = Stock.objects.filter(company=ticker, date__range=[start_date, date_str])
+    last_20_days = get_past_days(20, date_str, ticker)
     closes = []
     for day in last_20_days:
         closes.append(float(day.close))
     closes.append(close)
+    print(len(closes))
     stdev_20_day = statistics.stdev(closes)
 
-    
     oscillator_stocks = get_past_days(14, date_str, ticker)
     high_result_set = oscillator_stocks.aggregate(Max('high'))
     low_result_set = oscillator_stocks.aggregate(Min('low'))
     high_14_day = float(high_result_set['high__max'])
     low_14_day = float(low_result_set['low__min'])
-    stochastic_oscillator = ((close - low_14_day)/(high_14_day - low_14_day))*100
-
+    difference = high_14_day - low_14_day
+    if difference == 0:
+        stochastic_oscillator = 0
+    else:
+        stochastic_oscillator = ((close - low_14_day)/(high_14_day - low_14_day))*100
+    
     recent_data = {
         'current_price' : close,
         'previous_close': float(prev_stock.close),
@@ -74,7 +82,7 @@ def current_day_info(ticker):
         '20_day_stdev': stdev_20_day,
         'stochastic_oscillator': stochastic_oscillator
     }
-
+    
     return recent_data
 
 def update_historical_stocks():
@@ -128,7 +136,7 @@ def update_historical_stock_single(symbol):
         print(e)
 
 def create_company(symbol, name):
-    if not Company.objects.filter(symbol=symbol, name=name).exists():
+    if not Company.objects.filter(symbol=symbol).exists():
         print(symbol)
         print(name)
         company = Company.objects.create(symbol=symbol, name=name)

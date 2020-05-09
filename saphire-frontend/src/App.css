@@ -18,6 +18,16 @@ h3.black {
   font-weight: bold;
 }
 
+div.stockName {
+  text-align: center;
+
+}
+
+div.memo {
+  padding: 3%;
+  text-align: justify;
+}
+
 div.-centerSpace {
   align-content: flex-start;
   align-self: flex-end;

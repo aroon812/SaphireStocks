@@ -1,5 +1,6 @@
 import React from 'react';
 
+
 function getData(ticker) {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.open("POST", "http://129.114.16.219:8000/api/stocks/recentInfo/", false);
@@ -18,10 +19,6 @@ function getSign(oldVal, newVal){ //aaron*
     }
 }
 
-function blackTexth3(text){
-    return
-}
-
 
 export class StatsContainer extends React.Component{
     constructor(props){
@@ -34,8 +31,17 @@ export class StatsContainer extends React.Component{
             data: data,
         }
     }
-    render() {
 
+    componentWillReceiveProps(nextProps) {
+        const data = getData(nextProps.ticker)
+        this.setState({ data: data,
+                        ticker: nextProps.ticker,
+                        now: new Date(Date.now()),
+                        name: nextProps.name, });  
+    }  
+
+
+    render() { 
         return (
             <div className="col-md">
 

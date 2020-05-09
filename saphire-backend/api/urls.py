@@ -22,4 +22,6 @@ urlpatterns = [
     path('watchedList/', views.GetWatchedStocks.as_view(), name='watchedList'),
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'), 
     path('predict/', views.predict, name='prediction'),
+    path('deleteDuplicates/', views.delete_duplicates, name='duplicates'),
+
 ]

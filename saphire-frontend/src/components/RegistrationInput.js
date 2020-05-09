@@ -1,10 +1,10 @@
 import React from "react";
 import { Dialog, DialogActionsBar } from '@progress/kendo-react-dialogs';
 import { Input } from '@progress/kendo-react-inputs'; 
-import { Button, ButtonGroup, Toolbar, ToolbarItem } from '@progress/kendo-react-buttons';
+import { Button} from '@progress/kendo-react-buttons';
 
 
-const validEmailRegex = RegExp(/^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i);
+const validEmailRegex = RegExp(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
 const validateForm = (errors) => {
   let valid = true;
   Object.values(errors).forEach(
@@ -35,7 +35,6 @@ export class RegistrationInput extends React.Component{
   handleChange = (event) => {
     //event.preventDefault();
     const { name, value } = event.target;
-    var match;
     let errors = this.state.errors;
 
     switch (name) {
@@ -64,8 +63,6 @@ export class RegistrationInput extends React.Component{
             : '';
         break;
       case 'confirm': 
-        match = (errors.confirm.localeCompare(errors.password))
-        console.log(value);
          errors.confirm = 
           (value !== this.state.password)
             ? 'Passwords must match!'

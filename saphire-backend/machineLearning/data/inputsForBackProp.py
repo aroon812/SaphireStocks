@@ -12,31 +12,36 @@ def getInputs(tic, date, days):
     while len(regStocks) < 20:
         days += 1
         start_date = end_date - timedelta(days=days)
+        
         regStocks = Stock.objects.filter(company=company, date__range=[start_date, end_date])
+        curStockChange = StockChange.objects.get(stock=regStocks[len(regStocks)-1])
 
+    print()
     output=[]
+    
     for regStock in regStocks:
         stock = StockChange.objects.get(stock=regStock)
-
-        output.append(float(stock.low))
-        output.append(float(stock.high))
-        output.append(float(stock.avg))
-        output.append(float(stock.vol))
         output.append(float(stock.close))
-        output.append(float(stock.open))
         output.append(float(stock.range))
-        output.append(float(stock.ema_12_day))
-        output.append(float(stock.ema_26_day))
-        output.append(float(stock.vol_ema))
         output.append(float(stock.single_day_change))
         output.append(float(stock.day_to_day_change))
-        output.append(float(stock.high_52_day))
-        output.append(float(stock.high_52_week))
-        output.append(float(stock.low_52_day))
-        output.append(float(stock.low_52_week))
-        output.append(float(stock.avg_52_week))
-        output.append(float(stock.stdev_52_day))
-        output.append(float(stock.stdev_52_week))
+
+        if stock.date == curStockChange.date:
+            output.append(float(stock.low))
+            output.append(float(stock.high))
+            output.append(float(stock.avg))
+            output.append(float(stock.vol))
+            output.append(float(stock.open))
+            output.append(float(stock.ema_12_day))
+            output.append(float(stock.ema_26_day))
+            output.append(float(stock.vol_ema))
+            output.append(float(stock.high_52_day))
+            output.append(float(stock.high_52_week))
+            output.append(float(stock.low_52_day))
+            output.append(float(stock.low_52_week))
+            output.append(float(stock.avg_52_week))
+            output.append(float(stock.stdev_52_day))
+            output.append(float(stock.stdev_52_week))
     return np.array(output)
     
 #given a set of tickers it returns two dictionaries one mapping 

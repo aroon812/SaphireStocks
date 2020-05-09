@@ -1,7 +1,6 @@
 import React from "react";
 import {
   StockChart,
-  ChartTitle,
   ChartSeries,
   ChartSeriesItem,
   ChartNavigator,
@@ -44,36 +43,31 @@ export class StockChartContainer extends React.Component {
     }
   }
 
-  updateData = () => {
-    console.log(this.state.ticker);
-    const data = getStockData(this.state.ticker, fromU, toU);
+  componentWillReceiveProps(nextProps) {
+    const data = getStockData(nextProps.ticker, fromU, toU);
     const stockData = mapper(data);
-    this.state = {
-      seriesData: Array.from(stockData),
-      navigatorData: Array.from(stockData),
-      selected: 0,
-      to: toU,
-      from: fromU,
-    }
-  }
+    this.setState({ 
+                    ticker: nextProps.ticker,
+                    name: nextProps.name,
+                    seriesData: Array.from(stockData),
+                    navigatorData: Array.from(stockData),
+                    to: toU,
+                    from: fromU,
+                  });  
+  }  
 
-  componentWillReceiveProps(props){
-    if (props.ticker !== this.state.ticker && props.name !== this.state.name){
-    this.setState({
-      ticker: props.ticker, 
-      name: props.name
-    }, () => this.updateData());
-  }
-  }
+
 
   
   render() {
-    const { seriesData, navigatorData } = this.state;
+    const { seriesData, navigatorData, ticker, name } = this.state;
     return (
         <div>
           <div>
+            <div className="stockName">
+              <h4>{name} [{ticker}]</h4> 
+            </div>
             <StockChart onNavigatorFilter={this.onNavigatorChange} partialRedraw={true}>
-                <ChartTitle text= {this.state.name + " [" + this.state.ticker + "]"} />
                 <ChartSeries>
                     <ChartSeriesItem
                         data={seriesData}

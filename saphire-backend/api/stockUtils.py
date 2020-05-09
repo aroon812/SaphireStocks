@@ -4,8 +4,12 @@ from decimal import Decimal
 #from .utils import get_past_days
 import datetime       
 
+
+
 def get_past_days(num_days, date, ticker):
-    
+    if len(Stock.objects.filter(company=ticker)) < num_days:
+        num_days = len(Stock.objects.filter(company=ticker))
+
     start_date = date - datetime.timedelta(days=num_days)
     stocks = Stock.objects.filter(company=ticker, date__range=[start_date, date])
     days = num_days
@@ -24,7 +28,7 @@ def get_past_days(num_days, date, ticker):
 
 def fillStockFields(stock, company):
     date = stock.date
-    prev_date = stock.date - datetime.timedelta(days=2)
+    prev_date = stock.date - datetime.timedelta(days=1)
     
     try:
         #prev_stock = Stock.objects.get(company=company, date=prev_date)
@@ -32,7 +36,7 @@ def fillStockFields(stock, company):
         temp_stock_list = get_past_days(2, date, company.symbol)
         print(len(temp_stock_list))
         prev_stock = temp_stock_list[0]
-        print(prev_stock)
+        print("prev_stock: " + str(prev_stock))
         
     except Stock.DoesNotExist:
         print("dne")
@@ -82,6 +86,7 @@ def calc_vol_ema(stock, prev_stock, company):
         stock.vol_ema = round((stock.vol*Decimal(.05)) + (prev_stock.vol_ema*Decimal(.95)), 4)
     else:
         stock.vol_ema = round(stock.vol, 4)
+        print(stock.vol_ema)
 
 def calc_52_day_metrics(stock, end_date, company):
     start_date = end_date - datetime.timedelta(days=52)

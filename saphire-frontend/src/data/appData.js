@@ -26,10 +26,13 @@ function searchResults(query){
     xmlHttp.open("POST", "http://129.114.16.219:8000/api/search/", false);
     xmlHttp.setRequestHeader("Content-Type","application/json");
     xmlHttp.send( JSON.stringify({query: query}));
-
+    console.log(xmlHttp.responseText);
     if (xmlHttp.status === 200){
         var json = JSON.parse(xmlHttp.responseText);
         return json['symbol'];
+    }
+    else{
+        return null;
     }
 }
 
@@ -48,7 +51,8 @@ function userStocks() {
         var index = 0;
 
         for (var stock in json){
-            var company = new Object;
+            //var company = new Object();
+            var company = {};
             var priceHistory = [];
             var phIndex = 0;
             company["Ticker"] = json[stock][0]['company'];
@@ -113,7 +117,7 @@ function searchNews(company) {
     return json.articles;
 }
 
-function formatDate(date) {
+export function formatDate(date) {
     var d = new Date(date),
         month = '' + (d.getMonth() + 1),
         day = '' + d.getDate(),
