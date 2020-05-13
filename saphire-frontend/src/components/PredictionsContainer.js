@@ -34,21 +34,13 @@ const tooltipRender = ({ point }) => {
     )
 };
 
-/*
-last_day_close,
-current_close,
-percentage_change,
-projected_price,
-directional_prediction,
-five_day_boom,
-five_day_boom_confidence
-*/
 function getData(ticker, date){
     var xmlHttp = new XMLHttpRequest();
     
-    xmlHttp.open("POST", "http://129.114.16.219:8000/api/predict/", false);
+    xmlHttp.open("POST", "http://129.114.16.219/api/predict/", false);
     xmlHttp.setRequestHeader("Content-Type","application/json");
     xmlHttp.send( JSON.stringify({ticker: ticker, date: date}));
+    
 
     if (xmlHttp.status === 200){
         var json = JSON.parse(xmlHttp.responseText);
@@ -102,7 +94,6 @@ export class PredictionContainer extends React.Component {
     render() {
         return (
             <div className="d-flex">
-
                 <div className="row">
                     <div className="d-flex">
                         <div className="col">
@@ -119,7 +110,6 @@ export class PredictionContainer extends React.Component {
                             </div>
                         </div>    
                     </div>
-                    <div className="d-flex">
                         <div className="col">
                             <div className="row-md" >
             
@@ -138,7 +128,7 @@ export class PredictionContainer extends React.Component {
                         <div className="col">
                             <div className="row-md">
 
-                                <h3>3% Five Day Boom:</h3> <h3 className="black"  >{this.state.data["five_day_boom"]}</h3> 
+                                <h3>+3% Five Day Boom:</h3> <h3 className="black"  >{this.state.data["five_day_boom"]}</h3> 
 
                             </div>
                             <div className="row-md" >
@@ -151,7 +141,7 @@ export class PredictionContainer extends React.Component {
                     <div className="d-flex">
                         <div className="col">
                             <div className="row">
-                                <h3>3% Five Day Boom Confidence:</h3>
+                                <h3>+3% Five Day Boom Confidence:</h3>
                             </div>
                             <div className="row">
                                 <Chart style={{ height: 50 }} > 
@@ -166,11 +156,11 @@ export class PredictionContainer extends React.Component {
                                     </ChartValueAxis>
                                     <ChartTooltip render={tooltipRender} />
                                 </Chart> 
-                            </div>
-                        </div>     
-                    </div>
+                        </div>
+                    </div>     
                 </div>
             </div>
+            
         );
     }
 }

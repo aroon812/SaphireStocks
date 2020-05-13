@@ -16,7 +16,6 @@ from machineLearning.predict import predictStock
 from django.db.models import Q, Max
 
 class StockList(APIView):
-
     def get(self, request, format=None):
         stocks = SaphireStock.objects.all()
         serializer = StockSerializer(stocks, many=True)
@@ -35,7 +34,6 @@ class StockList(APIView):
         return Response({}, 400)
 
 class StockChangeList(APIView):
-
     def get(self, request, format=None):
         stock_changes = SaphireStockChange.objects.all()
         serializer = StockChangeSerializer(stock_changes, many=True)
@@ -53,7 +51,6 @@ class StockChangeList(APIView):
         return Response({}, 400)
 
 class CompanyList(APIView):
-
     def get(self, request, format=None):
         companies = SaphireCompany.objects.all()
         serializer = CompanySerializer(companies, many=True)
@@ -314,8 +311,7 @@ class WatchStock(APIView):
 class UpdateStock(APIView):
     permission_classes = (AllowAny,)
     
-    def post(self, request, format='json'):
-        
+    def post(self, request, format='json'): 
         try:  
             update_historical_stocks()     
             return Response({}, 200)
@@ -353,13 +349,6 @@ class DeleteStockList(APIView):
         data = request.data
         
         try:
-            """
-            date_to_delete = data.get("date")
-            high = datetime.strptime(date_to_delete, '%Y-%m-%d')
-            low = high - timedelta(days=10000)
-            
-            stocks = SaphireStock.objects.filter(date__range=[low, high])
-            """
             stocks = SaphireStock.objects.filter(company="XOM")
             stocks.delete()
             return Response({}, 200)

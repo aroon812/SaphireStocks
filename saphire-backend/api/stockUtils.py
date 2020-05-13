@@ -1,30 +1,26 @@
 from .models import Stock, StockChange, Company
 from django.db.models import Avg, Max, Min, StdDev
 from decimal import Decimal
-#from .utils import get_past_days
 import datetime       
 
 
-
 def get_past_days(num_days, date, ticker):
-    if len(Stock.objects.filter(company=ticker)) < num_days:
-        num_days = len(Stock.objects.filter(company=ticker))
+
+    numStocks = len(Stock.objects.filter(company=ticker))
+
+    if numStocks < num_days:
+        return Stock.objects.filter(company=ticker)
 
     start_date = date - datetime.timedelta(days=num_days)
     stocks = Stock.objects.filter(company=ticker, date__range=[start_date, date])
     days = num_days
     while len(stocks) < num_days:
+        print("inLoop " + str(len(stocks)) + " " + str(num_days))
         start_date = date - datetime.timedelta(days=days)
         stocks = Stock.objects.filter(company=ticker, date__range=[start_date, date])
         days += 1
     return stocks
     
-    """
-    start_date = date - datetime.timedelta(days=100000)
-    stocks = Stock.objects.filter(company=ticker, date__range=[start_date, date])[:10][::-1]
-    pk_list = [stock.pk for stock in stocks]
-    return Stock.objects.filter(pk__in=pk_list)
-    """
 
 def fillStockFields(stock, company):
     date = stock.date

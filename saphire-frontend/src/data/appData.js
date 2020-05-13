@@ -23,7 +23,7 @@ export const getMostRecent = (ticker) => {
 function searchResults(query){
     var xmlHttp = new XMLHttpRequest();
     
-    xmlHttp.open("POST", "http://129.114.16.219:8000/api/search/", false);
+    xmlHttp.open("POST", "http://129.114.16.219/api/search/", false);
     xmlHttp.setRequestHeader("Content-Type","application/json");
     xmlHttp.send( JSON.stringify({query: query}));
     console.log(xmlHttp.responseText);
@@ -40,7 +40,7 @@ function userStocks() {
     var xmlHttp = new XMLHttpRequest();
     var token = localStorage.getItem("token");
     
-    xmlHttp.open("POST", "http://129.114.16.219:8000/api/watchedList/", false);
+    xmlHttp.open("POST", "http://129.114.16.219/api/watchedList/", false);
     xmlHttp.setRequestHeader("Content-Type","application/json");
     xmlHttp.setRequestHeader("Authorization", "Token " + token);
     xmlHttp.send( null );
@@ -74,7 +74,7 @@ function searchStock(ticker, from, to) {
     var token = localStorage.getItem("token");
     var xmlHttp = new XMLHttpRequest();
     
-    xmlHttp.open( "POST", 'http://129.114.16.219:8000/api/stocks/stockRange/', false ); // false for synchronous request
+    xmlHttp.open( "POST", 'http://129.114.16.219/api/stocks/stockRange/', false ); // false for synchronous request
     xmlHttp.setRequestHeader("Content-Type","application/json");
     xmlHttp.setRequestHeader("Authorization", "Token " + token);
 

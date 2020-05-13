@@ -16,7 +16,7 @@ export class SignInInput extends React.Component{
 
 handleLogin = () => {
     var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "POST", 'http://129.114.16.219:8000/api/api-token-auth/', false); // false for synchronous request
+    xmlHttp.open( "POST", 'http://129.114.16.219/api/api-token-auth/', false); // false for synchronous request
     xmlHttp.setRequestHeader("Content-Type","application/json");
     xmlHttp.send(JSON.stringify({ username: this.state.email.toLowerCase(), password: this.state.password }));
    

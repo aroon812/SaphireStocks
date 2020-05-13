@@ -15,7 +15,6 @@ import { MyStocksContainer } from './components/MyStocksContainer';
 import { SearchInput } from './components/SearchInput'
 import { SignInInput } from './components/SignInInput';
 import { RegistrationInput } from './components/RegistrationInput';
-import { getCompanyData } from './data/appData'
 
 import '@progress/kendo-theme-material/dist/all.css';
 import './App.css';
@@ -25,7 +24,7 @@ import { TabsContainer } from './components/TabsContainer';
 
 function getName(symbol) {
   var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", 'http://129.114.16.219:8000/api/companies/' + symbol + '/', false); // false for synchronous request
+    xmlHttp.open( "GET", 'http://129.114.16.219/api/companies/' + symbol + '/', false); // false for synchronous request
     xmlHttp.setRequestHeader("Content-Type","application/json");
     xmlHttp.send(JSON.stringify({ symbol: symbol }));
    
@@ -56,7 +55,7 @@ class App extends Component {
       showLogin: false,
       showResgistration: false,
       selected: 0,
-      ticker: "A",
+      ticker: "AAPL",
       loggedIn: signedIn
     }
   }
@@ -77,12 +76,6 @@ class App extends Component {
   }
   }
 
-  handleShare = () => {
-    this.setState({
-      showDialog: !this.state.showDialog
-    }, () => console.log(this.state))
-  }
-
   handleQueryChange = event => {
     console.log(event);
     this.setState({ 
@@ -90,11 +83,11 @@ class App extends Component {
     });
   }
 
-  handleSearch = () => {
-    var ticker = getCompanyData(this.state.query);
+  handleTickerChange = (ticker) => {
+    //var ticker = getCompanyData(this.state.query);
     this.setState({
       ticker: ticker
-    }, () => this.forceUpdate());
+    });
   }
 
   handleSignIn = () => {
@@ -157,7 +150,6 @@ class App extends Component {
                     <ToolbarItem className="float-right d-flex">
                       <SearchInput callback={this.searchCallBack}/>
                       <Button className="float-right" onClick={this.handlePDFExport}>Export as PDF</Button>               
-                      <Button className="float-right" onClick={this.handleShare}>Share</Button> 
                       {
                         (this.state.loggedIn === false &&
                         <Button className="float-right" onClick={this.handleLoginStateChange}>Sign In</Button>) 
@@ -178,7 +170,7 @@ class App extends Component {
               { (this.state.loggedIn === true &&
               <div className="col-4">
                 <h3>My Stocks</h3>
-								<MyStocksContainer ticker={this.state.ticker} name={getName(this.state.ticker)}/>
+								<MyStocksContainer ticker={this.state.ticker} name={getName(this.state.ticker)} handleTickerChange={this.handleTickerChange}/>
               </div>) 
               || (this.state.loggedIn === false &&
               <div className="col-4">
