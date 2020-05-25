@@ -1,3 +1,4 @@
+#most, if not all test cases are written with an outdated version of the database schema in mind.
 from django.test import TestCase
 from alpha_vantage.timeseries import TimeSeries
 from .models import Stock, StockChange, Company

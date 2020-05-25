@@ -5,7 +5,9 @@ import datetime
 
 
 def get_past_days(num_days, date, ticker):
-
+    """
+    Get the past n days of stock information 
+    """
     numStocks = len(Stock.objects.filter(company=ticker))
 
     if numStocks < num_days:
@@ -23,11 +25,13 @@ def get_past_days(num_days, date, ticker):
     
 
 def fillStockFields(stock, company):
+    """
+    Calculate current metrics for a stock based on previous stock data for the same company.
+    """
     date = stock.date
     prev_date = stock.date - datetime.timedelta(days=1)
     
     try:
-        #prev_stock = Stock.objects.get(company=company, date=prev_date)
         print(date)
         temp_stock_list = get_past_days(2, date, company.symbol)
         print(len(temp_stock_list))
@@ -147,6 +151,9 @@ def calc_52_week_metrics(stock, end_date, company):
         stock.vol_avg_52_week = round(stock.vol, 4)
 
 def normalize_stock(stock):
+    """
+    Create the normalized stock data for feeding to machine learning models.
+    """
     vol = (stock.vol - stock.vol_avg_52_week)/stock.vol_avg_52_week
     high = (stock.high - stock.avg_52_day)/stock.avg_52_day
     low = (stock.low - stock.avg_52_day)/stock.avg_52_day

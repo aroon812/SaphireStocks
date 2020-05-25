@@ -111,7 +111,6 @@ class Company(APIView):
             print(e)
             return Response({'error': str(e)}, 400)
 
-
 class Stock(APIView):
     permission_classes = (AllowAny,)
     
@@ -209,6 +208,7 @@ class StockChange(APIView):
 
 class UserList(APIView):
     permission_classes = (AllowAny,)
+
     def get(self, request, format=None):
         users = get_user_model().objects.all()
         serializer = UserSerializer(users, many=True)
@@ -286,7 +286,6 @@ class WatchStock(APIView):
             stock = SaphireCompany.objects.get(symbol=symbol)
             user.watchedStocks.add(stock)
             user.save()
-
             return Response({}, 200)
         except Exception as e:
             print(e)
@@ -299,10 +298,8 @@ class WatchStock(APIView):
         try:
             user = request.user
             stock = SaphireCompany.objects.get(symbol=symbol)
-
             user.watchedStocks.remove(stock)
             user.save()
-
             return Response({}, 200)
         except Exception as e:
             print(e)
@@ -345,9 +342,11 @@ class GetWatchedStocks(APIView):
             return Response({'error': str(e)}, 400)
 
 class DeleteStockList(APIView):
+    """
+    Test endpoint. Not for production.
+    """
     def delete(self, request):
-        data = request.data
-        
+        data = request.data  
         try:
             stocks = SaphireStock.objects.filter(company="XOM")
             stocks.delete()
@@ -418,15 +417,6 @@ def search(request, format="json"):
         query = request.data.get("query")
         
         try:
-            """
-            companies = SaphireCompany.objects.filter(Q(name__icontains=query) | Q(symbol__icontains=query)).distinct()
-            company_list = []
-            for company in companies:
-                print(company)
-                serializer = CompanySerializer(company)
-                company_list.append(serializer.data)
-           
-            """
             company = SaphireCompany.objects.get(Q(name=query) | Q(symbol=query))
             serializer = CompanySerializer(company)
             
@@ -457,6 +447,9 @@ def recent_stock_info(request, format="json"):
 @authentication_classes([])
 @permission_classes([])
 def delete_duplicates(request, format="json"):
+    """
+    Test endpoint. Not for production.
+    """
     if request.method == 'POST':     
         try:
             for row in SaphireStock.objects.all():

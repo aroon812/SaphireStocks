@@ -32,6 +32,9 @@ class MyUserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 
 class User(AbstractUser):
+    """
+    A user object which is a modified version of the base Django user.
+    """
     watchedStocks = models.ManyToManyField('Company', blank=True, related_name='watchedBy')
     email = models.EmailField(unique=True)
     REQUIRED_FIELDS = []
@@ -48,6 +51,9 @@ class User(AbstractUser):
         return self.email
 
 class Company(models.Model):
+    """
+    A company object. Just a symbol and a name for each entry in the database.
+    """
     symbol = models.CharField(max_length=5, default='', blank=True, null=False, unique=True, primary_key=True)
     name = models.CharField(max_length=200, default='', blank=True, null=True)
     
@@ -55,6 +61,9 @@ class Company(models.Model):
         return str(self.name)
 
 class Stock(models.Model):
+    """
+    A single day for the stocks of a company.
+    """
     date = models.DateField(null=False)
     company = models.ForeignKey('Company', on_delete=models.CASCADE, null=False)
     vol = models.IntegerField(null=False)
@@ -83,6 +92,9 @@ class Stock(models.Model):
         return str(self.company.name + " " + str(self.date))
 
 class StockChange(models.Model):
+    """
+    Represents the normalized data for each stock, which is used as input data for machine learnign models.
+    """
     stock = models.ForeignKey('Stock', on_delete=models.CASCADE)
     date = models.DateField(null=False)
     vol = models.IntegerField(null=False)

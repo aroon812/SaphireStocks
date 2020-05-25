@@ -14,9 +14,10 @@ import redis
 key = '23V86RX6LO5AUIX4'
 ts = TimeSeries(key)
 
-
-
 def current_day_info(ticker):
+    """
+    Returns current day stock information given a company ticker.
+    """
     stock, meta = ts.get_intraday(symbol=ticker, interval='1min')
     recent = list(stock)[0]
     stocks = Stock.objects.filter(company=ticker)
@@ -47,8 +48,8 @@ def current_day_info(ticker):
     ema_12_day = (avg*.15) + (float(prev_stock.avg)*.85)
     ema_26_day = (avg*.075) + (float(prev_stock.avg)*.925)
     start_date = date_str - timedelta(days=20)
-    #last_20_days = Stock.objects.filter(company=ticker, date__range=[start_date, date_str])
     last_20_days = get_past_days(20, date_str, ticker)
+
     closes = []
     for day in last_20_days:
         closes.append(float(day.close))
@@ -86,6 +87,9 @@ def current_day_info(ticker):
     return recent_data
 
 def update_historical_stocks():
+    """
+    Add the past 5 years of stock information to the database for all companies listed in the .csv file.
+    """
     names = pandas.read_csv('api/namesData/100_names_data.csv')
     with open('/home/stockteam/saphire/saphire-backend/api/update_file.txt', 'r') as progress_file:
             tickers_list = progress_file.read().splitlines()
@@ -103,8 +107,10 @@ def update_historical_stocks():
                     progress_file.write('%s\n' % ticker)
                 progress_file.close()
             
-
 def update_historical_stock_single(symbol):
+    """
+    Add the past 5 years of stock information to the database for a single company given a stock ticker.
+    """
     try: 
         stock, meta = ts.get_daily(symbol=symbol, outputsize='full')
         company = Company.objects.get(symbol=symbol)
@@ -136,36 +142,40 @@ def update_historical_stock_single(symbol):
         print(e)
 
 def create_company(symbol, name):
+    """
+    Add a company to the database given a name and a ticker.
+    """
     if not Company.objects.filter(symbol=symbol).exists():
         print(symbol)
         print(name)
         company = Company.objects.create(symbol=symbol, name=name)
         company.save()
 
-
 def update_stock(symbol, name):
-
-        try:
-            create_company(symbol, name)
-            stock, meta = ts.get_daily(symbol=symbol)
-            recent_date = list(stock)[0]
-            stock_dict = dict(stock[recent_date])
-            validated_data = {
-                    'date': recent_date,
-                    'company': symbol,
-                    'open': stock_dict['1. open'], 
-                    'high': stock_dict['2. high'], 
-                    'low': stock_dict['3. low'], 
-                    'close': stock_dict['4. close'], 
-                    'vol':stock_dict['5. volume']
-                }
-                
-            serializer = StockSerializer(data=validated_data)
-            if serializer.is_valid():
-                serializer.save()
+    """
+    Add a company's stock info from the most recent full day to the database.
+    """
+    try:
+        create_company(symbol, name)
+        stock, meta = ts.get_daily(symbol=symbol)
+        recent_date = list(stock)[0]
+        stock_dict = dict(stock[recent_date])
+        validated_data = {
+                'date': recent_date,
+                'company': symbol,
+                'open': stock_dict['1. open'], 
+                'high': stock_dict['2. high'], 
+                'low': stock_dict['3. low'], 
+                'close': stock_dict['4. close'], 
+                'vol':stock_dict['5. volume']
+            }
             
-        except Exception as e:
-                print(e)
+        serializer = StockSerializer(data=validated_data)
+        if serializer.is_valid():
+            serializer.save()
+        
+    except Exception as e:
+            print(e)
 
 
 
