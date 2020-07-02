@@ -25,14 +25,13 @@ def pull_stock_data():
     for i in range(calls_per_minute):
         if base+i < len(names):
             print('iteration:' + str(base+i))
-
             update_stock(names['Ticker'][base+i], names['Name'][base+i])
     r.set('stock_base', base+calls_per_minute)
 
 @task
 def reset_stock_counter():
     """
-    Reset the index for the current stock to update at 12:00am UTC.
+    Reset the index for the current stock to update.
     """
     r = redis.Redis(host='localhost', port=6379, db=0)
     r.set('stock_base', 0)

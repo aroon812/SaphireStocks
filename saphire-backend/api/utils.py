@@ -1,18 +1,17 @@
 from __future__ import absolute_import, unicode_literals
-from celery import task
 from alpha_vantage.timeseries import TimeSeries
+import statistics
+import pandas
 from .models import Stock, StockChange, Company
 from .serializers import StockSerializer
 from django.db.models import Max, Min
-import statistics
-import pandas
-import numpy
 from datetime import datetime, timedelta
 from .stockUtils import get_past_days
-import redis
+
 
 key = '23V86RX6LO5AUIX4'
 ts = TimeSeries(key)
+
 
 def current_day_info(ticker):
     """
@@ -21,19 +20,20 @@ def current_day_info(ticker):
     stock, meta = ts.get_intraday(symbol=ticker, interval='1min')
     recent = list(stock)[0]
     stocks = Stock.objects.filter(company=ticker)
-    
+
     recent_date = stocks.aggregate(Max('date'))
     date_str = recent_date['date__max']
     prev_stock = Stock.objects.get(company=ticker, date=date_str)
-    print(prev_stock.low_52_week)
-    
+
     high = float(stock[recent]['2. high'])
     low = float(stock[recent]['3. low'])
     close = float(stock[recent]['4. close'])
     volume = float(stock[recent]['5. volume'])
-    percent_change = ((float(stock[recent]['4. close']) - float(prev_stock.close))/float(prev_stock.close)) * 100
-    day_range = float(stock[recent]['2. high']) - float(stock[recent]['3. low'])
-    
+    percent_change = ((float(stock[recent]['4. close']) -
+                       float(prev_stock.close))/float(prev_stock.close)) * 100
+    day_range = float(stock[recent]['2. high']) - \
+        float(stock[recent]['3. low'])
+
     if high > float(prev_stock.high_52_day):
         high_52_day = high
     else:
@@ -42,7 +42,7 @@ def current_day_info(ticker):
         low_52_day = low
     else:
         low_52_day = float(prev_stock.low_52_day)
-    
+
     avg = (high + low + close)/3
     range_52_day = high_52_day - low_52_day
     ema_12_day = (avg*.15) + (float(prev_stock.avg)*.85)
@@ -54,7 +54,7 @@ def current_day_info(ticker):
     for day in last_20_days:
         closes.append(float(day.close))
     closes.append(close)
-    print(len(closes))
+
     stdev_20_day = statistics.stdev(closes)
 
     oscillator_stocks = get_past_days(14, date_str, ticker)
@@ -66,10 +66,11 @@ def current_day_info(ticker):
     if difference == 0:
         stochastic_oscillator = 0
     else:
-        stochastic_oscillator = ((close - low_14_day)/(high_14_day - low_14_day))*100
-    
+        stochastic_oscillator = (
+            (close - low_14_day)/(high_14_day - low_14_day))*100
+
     recent_data = {
-        'current_price' : close,
+        'current_price': close,
         'previous_close': float(prev_stock.close),
         'open': float(stock[recent]['1. open']),
         'percent_change': percent_change,
@@ -83,17 +84,18 @@ def current_day_info(ticker):
         '20_day_stdev': stdev_20_day,
         'stochastic_oscillator': stochastic_oscillator
     }
-    
+
     return recent_data
+
 
 def update_historical_stocks():
     """
     Add the past 5 years of stock information to the database for all companies listed in the .csv file.
     """
     names = pandas.read_csv('api/namesData/100_names_data.csv')
-    with open('/home/stockteam/saphire/saphire-backend/api/update_file.txt', 'r') as progress_file:
-            tickers_list = progress_file.read().splitlines()
-            progress_file.close()
+    with open('api/update_file.txt', 'r') as progress_file:
+        tickers_list = progress_file.read().splitlines()
+        progress_file.close()
 
     for i in range(len(names)):
         if names['Ticker'][i] not in tickers_list:
@@ -101,45 +103,47 @@ def update_historical_stocks():
             create_company(names['Ticker'][i], names['Name'][i])
             update_historical_stock_single(names['Ticker'][i])
 
-            with open('/home/stockteam/saphire/saphire-backend/api/update_file.txt', 'w') as progress_file:
+            with open('api/update_file.txt', 'w') as progress_file:
                 tickers_list.append(names['Ticker'][i])
                 for ticker in tickers_list:
                     progress_file.write('%s\n' % ticker)
                 progress_file.close()
-            
+
+
 def update_historical_stock_single(symbol):
     """
     Add the past 5 years of stock information to the database for a single company given a stock ticker.
     """
-    try: 
+    try:
         stock, meta = ts.get_daily(symbol=symbol, outputsize='full')
         company = Company.objects.get(symbol=symbol)
         dates = list(stock)
         dates.reverse()
-        today = datetime.strptime(str(datetime.date(datetime.today())), '%Y-%m-%d')
+        today = datetime.strptime(
+            str(datetime.date(datetime.today())), '%Y-%m-%d')
         cutoff = today - timedelta(days=1825)
 
         for date in dates:
             if datetime.strptime(date, '%Y-%m-%d') >= cutoff:
-                #print(symbol + " " + str(len(dates)) + " " + str(date))
-                stock_dict = dict(stock[date]) 
-                
+                stock_dict = dict(stock[date])
+
                 validated_data = {
                     'date': date,
                     'company': symbol,
-                    'open': stock_dict['1. open'], 
-                    'high': stock_dict['2. high'], 
-                    'low': stock_dict['3. low'], 
-                    'close': stock_dict['4. close'], 
-                    'vol':stock_dict['5. volume']
+                    'open': stock_dict['1. open'],
+                    'high': stock_dict['2. high'],
+                    'low': stock_dict['3. low'],
+                    'close': stock_dict['4. close'],
+                    'vol': stock_dict['5. volume']
                 }
-                
+
                 serializer = StockSerializer(data=validated_data)
                 if serializer.is_valid():
                     serializer.save()
-                    
+
     except Exception as e:
         print(e)
+
 
 def create_company(symbol, name):
     """
@@ -151,6 +155,7 @@ def create_company(symbol, name):
         company = Company.objects.create(symbol=symbol, name=name)
         company.save()
 
+
 def update_stock(symbol, name):
     """
     Add a company's stock info from the most recent full day to the database.
@@ -161,21 +166,18 @@ def update_stock(symbol, name):
         recent_date = list(stock)[0]
         stock_dict = dict(stock[recent_date])
         validated_data = {
-                'date': recent_date,
-                'company': symbol,
-                'open': stock_dict['1. open'], 
-                'high': stock_dict['2. high'], 
-                'low': stock_dict['3. low'], 
-                'close': stock_dict['4. close'], 
-                'vol':stock_dict['5. volume']
-            }
-            
+            'date': recent_date,
+            'company': symbol,
+            'open': stock_dict['1. open'],
+            'high': stock_dict['2. high'],
+            'low': stock_dict['3. low'],
+            'close': stock_dict['4. close'],
+            'vol': stock_dict['5. volume']
+        }
+
         serializer = StockSerializer(data=validated_data)
         if serializer.is_valid():
             serializer.save()
-        
+
     except Exception as e:
-            print(e)
-
-
-
+        print(e)

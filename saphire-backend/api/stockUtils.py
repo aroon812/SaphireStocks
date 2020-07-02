@@ -1,7 +1,7 @@
 from .models import Stock, StockChange, Company
 from django.db.models import Avg, Max, Min, StdDev
 from decimal import Decimal
-import datetime       
+import datetime
 
 
 def get_past_days(num_days, date, ticker):
@@ -9,20 +9,21 @@ def get_past_days(num_days, date, ticker):
     Get the past n days of stock information 
     """
     numStocks = len(Stock.objects.filter(company=ticker))
-
     if numStocks < num_days:
         return Stock.objects.filter(company=ticker)
 
     start_date = date - datetime.timedelta(days=num_days)
-    stocks = Stock.objects.filter(company=ticker, date__range=[start_date, date])
+    stocks = Stock.objects.filter(
+        company=ticker, date__range=[start_date, date])
     days = num_days
+
     while len(stocks) < num_days:
-        print("inLoop " + str(len(stocks)) + " " + str(num_days))
         start_date = date - datetime.timedelta(days=days)
-        stocks = Stock.objects.filter(company=ticker, date__range=[start_date, date])
+        stocks = Stock.objects.filter(
+            company=ticker, date__range=[start_date, date])
         days += 1
     return stocks
-    
+
 
 def fillStockFields(stock, company):
     """
@@ -30,18 +31,14 @@ def fillStockFields(stock, company):
     """
     date = stock.date
     prev_date = stock.date - datetime.timedelta(days=1)
-    
+
     try:
-        print(date)
         temp_stock_list = get_past_days(2, date, company.symbol)
-        print(len(temp_stock_list))
         prev_stock = temp_stock_list[0]
-        print("prev_stock: " + str(prev_stock))
-        
     except Stock.DoesNotExist:
         print("dne")
         prev_stock = None
-    
+
     calc_range(stock)
     calc_avg(stock)
     calc_single_day_change(stock)
@@ -54,14 +51,18 @@ def fillStockFields(stock, company):
     stock.save()
     normalize_stock(stock)
 
+
 def calc_range(stock):
     stock.range = round(stock.high - stock.low, 4)
+
 
 def calc_avg(stock):
     stock.avg = round((stock.high + stock.low + stock.close)/3, 4)
 
+
 def calc_single_day_change(stock):
     stock.single_day_change = round(stock.close - stock.open, 4)
+
 
 def calc_day_to_day_change(stock, prev_stock, company):
     if prev_stock is not None:
@@ -69,39 +70,46 @@ def calc_day_to_day_change(stock, prev_stock, company):
     else:
         stock.day_to_day_change = round(stock.close, 4)
 
+
 def calc_ema_12_day(stock, prev_stock, company):
     if prev_stock is not None:
-        stock.ema_12_day = round((stock.avg*Decimal(.15)) + (prev_stock.avg*Decimal(.85)), 4)
+        stock.ema_12_day = round(
+            (stock.avg*Decimal(.15)) + (prev_stock.avg*Decimal(.85)), 4)
     else:
         stock.ema_12_day = round(stock.avg, 4)
 
+
 def calc_ema_26_day(stock, prev_stock, company):
     if prev_stock is not None:
-        stock.ema_26_day = round((stock.avg*Decimal(.075)) + (prev_stock.avg*Decimal(.925)), 4)
+        stock.ema_26_day = round(
+            (stock.avg*Decimal(.075)) + (prev_stock.avg*Decimal(.925)), 4)
     else:
         stock.ema_26_day = round(stock.avg, 4)
 
+
 def calc_vol_ema(stock, prev_stock, company):
     if prev_stock is not None:
-        stock.vol_ema = round((stock.vol*Decimal(.05)) + (prev_stock.vol_ema*Decimal(.95)), 4)
+        stock.vol_ema = round((stock.vol*Decimal(.05)) +
+                              (prev_stock.vol_ema*Decimal(.95)), 4)
     else:
         stock.vol_ema = round(stock.vol, 4)
-        print(stock.vol_ema)
+
 
 def calc_52_day_metrics(stock, end_date, company):
     start_date = end_date - datetime.timedelta(days=52)
-    stocks = Stock.objects.filter(company=company, date__range=[start_date, end_date])
+    stocks = Stock.objects.filter(
+        company=company, date__range=[start_date, end_date])
     high_result_set = stocks.aggregate(Max('high'))
     low_result_set = stocks.aggregate(Min('low'))
     avg_result_set = stocks.aggregate(Avg('close'))
     stdev_result_set = stocks.aggregate(StdDev('close'))
     if high_result_set['high__max'] is not None:
-        stock.high_52_day = round(high_result_set['high__max'], 4)   
+        stock.high_52_day = round(high_result_set['high__max'], 4)
     else:
         stock.high_52_day = round(stock.high, 4)
 
     if low_result_set['low__min'] is not None:
-            stock.low_52_day = round(low_result_set['low__min'], 4)
+        stock.low_52_day = round(low_result_set['low__min'], 4)
     else:
         stock.low_52_day = round(stock.low, 4)
 
@@ -115,10 +123,11 @@ def calc_52_day_metrics(stock, end_date, company):
     else:
         stock.stdev_52_day = 0
 
+
 def calc_52_week_metrics(stock, end_date, company):
     start_date = end_date - datetime.timedelta(days=365)
-    stocks = Stock.objects.filter(company=company, date__range=[start_date, end_date])
-    
+    stocks = Stock.objects.filter(
+        company=company, date__range=[start_date, end_date])
     high_result_set = stocks.aggregate(Max('high'))
     low_result_set = stocks.aggregate(Min('low'))
     avg_result_set = stocks.aggregate(Avg('close'))
@@ -126,7 +135,7 @@ def calc_52_week_metrics(stock, end_date, company):
     vol_result_set = stocks.aggregate(Avg('vol'))
 
     if high_result_set['high__max'] is not None:
-        stock.high_52_week = round(high_result_set['high__max'], 4)  
+        stock.high_52_week = round(high_result_set['high__max'], 4)
     else:
         stock.high_52_week = round(stock.high, 4)
 
@@ -150,6 +159,7 @@ def calc_52_week_metrics(stock, end_date, company):
     else:
         stock.vol_avg_52_week = round(stock.vol, 4)
 
+
 def normalize_stock(stock):
     """
     Create the normalized stock data for feeding to machine learning models.
@@ -161,12 +171,15 @@ def normalize_stock(stock):
     open = (stock.open - stock.avg_52_day)/stock.avg_52_day
     close = (stock.close - stock.avg_52_day)/stock.avg_52_day
     range = (stock.range - stock.avg_52_day)/stock.avg_52_day
-    single_day_change = (stock.single_day_change - stock.avg_52_day)/stock.avg_52_day
-    day_to_day_change = (stock.day_to_day_change - stock.avg_52_day)/stock.avg_52_day
+    single_day_change = (stock.single_day_change -
+                         stock.avg_52_day)/stock.avg_52_day
+    day_to_day_change = (stock.day_to_day_change -
+                         stock.avg_52_day)/stock.avg_52_day
     ema_12_day = (stock.ema_12_day - stock.avg_52_day)/stock.avg_52_day
     ema_26_day = (stock.ema_26_day - stock.avg_52_day)/stock.avg_52_day
     vol_ema = (stock.vol_ema - stock.vol_avg_52_week)/stock.vol_avg_52_week
-    vol_avg_52_week = (stock.vol_avg_52_week - stock.vol_avg_52_week)/stock.vol_avg_52_week
+    vol_avg_52_week = (stock.vol_avg_52_week -
+                       stock.vol_avg_52_week)/stock.vol_avg_52_week
     high_52_day = (stock.high_52_day - stock.avg_52_day)/stock.avg_52_day
     high_52_week = (stock.high_52_week - stock.avg_52_day)/stock.avg_52_day
     low_52_day = (stock.low_52_day - stock.avg_52_day)/stock.avg_52_day
@@ -175,11 +188,10 @@ def normalize_stock(stock):
     avg_52_week = (stock.avg_52_week - stock.avg_52_day)/stock.avg_52_day
     stdev_52_day = (stock.stdev_52_day - stock.avg_52_day)/stock.avg_52_day
     stdev_52_week = (stock.stdev_52_week - stock.avg_52_day)/stock.avg_52_day
-    
-    stock_change = StockChange(
-                    stock=stock, date=stock.date, vol=vol, high=high, low=low, avg=avg, open=open, close=close, range=range, single_day_change=single_day_change, day_to_day_change=day_to_day_change,
-                    ema_12_day=ema_12_day, ema_26_day=ema_26_day, vol_ema=vol_ema, vol_avg_52_week=vol_avg_52_week, high_52_day=high_52_day, high_52_week=high_52_week, low_52_day=low_52_day, low_52_week=low_52_week,
-                    avg_52_day=avg_52_day, avg_52_week=avg_52_week, stdev_52_day=stdev_52_day, stdev_52_week=stdev_52_week
-                    )
 
+    stock_change = StockChange(
+        stock=stock, date=stock.date, vol=vol, high=high, low=low, avg=avg, open=open, close=close, range=range, single_day_change=single_day_change, day_to_day_change=day_to_day_change,
+        ema_12_day=ema_12_day, ema_26_day=ema_26_day, vol_ema=vol_ema, vol_avg_52_week=vol_avg_52_week, high_52_day=high_52_day, high_52_week=high_52_week, low_52_day=low_52_day, low_52_week=low_52_week,
+        avg_52_day=avg_52_day, avg_52_week=avg_52_week, stdev_52_day=stdev_52_day, stdev_52_week=stdev_52_week
+    )
     stock_change.save()

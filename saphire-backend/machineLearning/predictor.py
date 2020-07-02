@@ -4,7 +4,7 @@ import os
 from .neural_network import NeuralNet as nn
 
 RAW_DATA_FOLDER = 'data/historical_stock_data/'
-WEIGHTS_FILE_PATH = '/home/stockteam/saphire/saphire-backend/machineLearning/data/end_weights.npy'
+WEIGHTS_FILE_PATH = './machineLearning/data/end_weights.npy'
 
 def getInputs(date, inputData): 
     listOfDates= list(inputData.index)

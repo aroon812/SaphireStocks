@@ -24,9 +24,9 @@ SECRET_KEY = 'leh$__1r-#d97-va(8rx3+n-933&2$vfeogz3)j+bj^qzxjw(i'
 #SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['129.114.16.219']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition

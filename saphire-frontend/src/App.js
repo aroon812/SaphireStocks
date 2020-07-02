@@ -24,7 +24,7 @@ import { TabsContainer } from './components/TabsContainer';
 
 function getName(symbol) {
   var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", 'http://129.114.16.219/api/companies/' + symbol + '/', false); // false for synchronous request
+    xmlHttp.open( "GET", 'http://127.0.0.1:8000/api/companies/' + symbol + '/', false); // false for synchronous request
     xmlHttp.setRequestHeader("Content-Type","application/json");
     xmlHttp.send(JSON.stringify({ symbol: symbol }));
    

@@ -37,7 +37,7 @@ const tooltipRender = ({ point }) => {
 function getData(ticker, date){
     var xmlHttp = new XMLHttpRequest();
     
-    xmlHttp.open("POST", "http://129.114.16.219/api/predict/", false);
+    xmlHttp.open("POST", "http://127.0.0.1:8000/api/predict/", false);
     xmlHttp.setRequestHeader("Content-Type","application/json");
     xmlHttp.send( JSON.stringify({ticker: ticker, date: date}));
     
