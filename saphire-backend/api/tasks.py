@@ -13,7 +13,7 @@ def pull_stock_data():
     """
     Get up to date, daily stock data for each stock name in the provided .csv file.
     """
-    calls_per_minute = 30
+    calls_per_minute = 5
     r = redis.Redis(host='localhost', port=6379, db=0)
 
     if r.get('stock_base') is None:

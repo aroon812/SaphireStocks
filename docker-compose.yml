@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+    db:
+        image: postgres
+        volumes:
+            - saphire:/var/lib/postgresql/data
+        environment: 
+            - POSTGRES_DB=saphire
+            - POSTGRES_USER=saphire
+            - POSTGRES_PASSWORD=saphire 
+    backend:
+        build: ./saphire-backend
+        command: python manage.py runserver 0.0.0.0:8000
+        #volumes:
+         #   - saphire:/saphire-backend
+        ports:
+            - "8000:8000"
+        depends_on:
+            - db
+    frontend:
+        build: ./saphire-frontend
+        command: yarn start  
+        #volumes:
+         #   - saphire:/saphire-frontend 
+        ports:
+            - "3000:3000"     
+
+volumes:
+    saphire:
