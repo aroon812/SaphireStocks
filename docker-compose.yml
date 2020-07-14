@@ -1,6 +1,30 @@
 version: '3'
 
 services:
+    worker:
+        build: ./saphire-backend
+        command: celery -A saphire-backend worker -l info --pool=solo
+        depends_on: 
+            - beat
+            - redis
+        networks:
+            - backend
+            
+    beat:
+        build: ./saphire-backend
+        command: celery -A saphire-backend beat -l info
+        depends_on: 
+            - redis
+        networks:
+            - backend
+
+    redis:
+        image: redis
+        ports:
+            - "6379:6379"
+        networks:
+            - backend
+
     db:
         image: postgres
         volumes:
@@ -9,22 +33,27 @@ services:
             - POSTGRES_DB=saphire
             - POSTGRES_USER=saphire
             - POSTGRES_PASSWORD=saphire 
+        networks:
+            - backend
+
     backend:
         build: ./saphire-backend
         command: python manage.py runserver 0.0.0.0:8000
-        #volumes:
-         #   - saphire:/saphire-backend
         ports:
             - "8000:8000"
+        networks:
+            - backend
         depends_on:
             - db
+
     frontend:
         build: ./saphire-frontend
         command: yarn start  
-        #volumes:
-         #   - saphire:/saphire-frontend 
         ports:
             - "3000:3000"     
 
 volumes:
     saphire:
+
+networks:
+    backend:

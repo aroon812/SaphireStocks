@@ -24,7 +24,7 @@ SECRET_KEY = 'leh$__1r-#d97-va(8rx3+n-933&2$vfeogz3)j+bj^qzxjw(i'
 #SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -150,8 +150,8 @@ CORS_ORIGIN_ALLOW_ALL = True # added to solve CORS
 
 AUTH_USER_MODEL = 'api.User'
 CELERY_IMPORTS = ['api.tasks']
-CELERY_BROKER_URL = 'redis://localhost:6379'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
@@ -160,11 +160,9 @@ CELERY_BEAT_SCHEDULE = {
     'task1': {
         'task': 'api.tasks.pull_stock_data',
         'schedule': crontab(minute="*", hour="*"),
-        #'args': (*args)
     },
     'task2' : {
         'task': 'api.tasks.reset_stock_counter',
         'schedule' : crontab(minute=0, hour=0),
-        #'args': (*args)
     }
 }
