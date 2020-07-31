@@ -219,7 +219,7 @@ class StockChange(APIView):
 
 
 class UserList(APIView):
-    permission_classes = (IsAdminUser,)
+    permission_classes = (AllowAny,)
 
     def get(self, request, format=None):
         users = get_user_model().objects.all()
@@ -244,7 +244,7 @@ class UserList(APIView):
 
 
 class User(APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, pk, format=None):
         user = get_user_model().objects.get(pk=pk)
