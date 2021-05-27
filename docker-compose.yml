@@ -1,62 +1,55 @@
-version: '3'
+version: '3.7'
 
 services:
-    worker:
-        build: ./saphire-backend
-        command: celery -A saphire-backend worker -l info --pool=solo
-        depends_on: 
-            - beat
-            - redis
-        networks:
-            - backend
-            
-    beat:
-        build: ./saphire-backend
-        command: celery -A saphire-backend beat -l info
-        depends_on: 
-            - redis
-        networks:
-            - backend
-
-    redis:
-        image: redis
-        ports:
-            - "6379:6379"
-        networks:
-            - backend
-
-    db:
-        image: postgres
-        volumes:
-            - saphire:/var/lib/postgresql/data
-        environment: 
-            - POSTGRES_DB=saphire
-            - POSTGRES_USER=saphire
-            - POSTGRES_PASSWORD=saphire 
-        networks:
-            - backend
-
     backend:
-        build: ./saphire-backend
-        command: sh -c "python manage.py wait_for_db &&
-                        python manage.py makemigrations &&
-                        python manage.py migrate &&
-                        python manage.py runserver 0.0.0.0:8000"
-        ports:
-            - "8000:8000"
-        networks:
-            - backend
+        build: 
+            context: ./saphire-backend
+            dockerfile: Dockerfile
+        volumes:
+            - backend_static_volume:/usr/src/app/static
+        expose:
+            - 8000
+        env_file: 
+            - ./backend/.env
+        command: gunicorn saphire-backend.wsgi.application --bind 0.0.0.0:8000
         depends_on:
             - db
 
+    db:
+        image: postgres:12-alpine
+        volumes:
+            - postgres_data:/var/lib/postgresql/data/
+        env_file: 
+            - ./postgres/.env
+
     frontend:
-        build: ./saphire-frontend
-        command: yarn start  
+        build:
+            context: ./frontend
+            dockerfile: Dockerfile
+            args:
+                - API_SERVER=${ENV_API_SERVER}
+        volumes:
+            - frontend_static_volume:/usr/src/app/build/static
+        expose:
+            - 3000
+        env_file:
+            - .env
+        command: serve -s build -l 3000
+        depends_on:
+            - backend
+
+    nginx:
+        restart: always
+        build: ./nginx
+        volumes:
+            - backend_static_volume:/usr/src/app/backend_files/static
+            - frontend_static_volume:/usr/src/app/frontend_files/static
         ports:
-            - "3000:3000"     
+            - 80:80
+        depends_on:
+            - frontend
 
 volumes:
-    saphire:
-
-networks:
-    backend:
+    postgres_data:
+    backend_static_volume:
+    frontend_static_volume:
