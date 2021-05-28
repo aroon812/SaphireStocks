@@ -12,9 +12,8 @@ fi
 
 python manage.py collectstatic --nooutput
 python manage.py migrate --noinput
-echo "from django.contrib.auth.models import User;
-from django.contrib.auth import get_user_model;
+echo "from django.contrib.auth import get_user_model;
 get_user_model().objects.filter(email='$DJANGO_ADMIN_EMAIL').delete();
-get_user_model().objects.create_superuser('$DJANGO_ADMIN_USER', '$DJANGO_ADMIN_EMAIL', '$DJANGO_ADMIN_PASSWORD')" | python manage.py shell
+get_user_model().objects.create_superuser(email='$DJANGO_ADMIN_EMAIL', password='$DJANGO_ADMIN_PASSWORD')" | python manage.py shell
 
 exec "$@"
