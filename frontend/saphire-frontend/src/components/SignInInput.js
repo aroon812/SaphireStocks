@@ -2,6 +2,7 @@ import React from "react";
 import { Dialog, DialogActionsBar } from '@progress/kendo-react-dialogs';
 import { Input } from '@progress/kendo-react-inputs'; 
 import { Button } from '@progress/kendo-react-buttons';
+import { API_SERVER } from "../settings";
 
 export class SignInInput extends React.Component{
     constructor(props) {
@@ -16,7 +17,7 @@ export class SignInInput extends React.Component{
 
 handleLogin = () => {
     var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "POST", 'http://127.0.0.1:8000/api/api-token-auth/', false); // false for synchronous request
+    xmlHttp.open( "POST", API_SERVER + '/api/api-token-auth/', false); // false for synchronous request
     xmlHttp.setRequestHeader("Content-Type","application/json");
     xmlHttp.send(JSON.stringify({ username: this.state.email.toLowerCase(), password: this.state.password }));
    

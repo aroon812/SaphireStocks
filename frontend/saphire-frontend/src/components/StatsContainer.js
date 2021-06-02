@@ -1,9 +1,10 @@
 import React from 'react';
+import { API_SERVER } from '../settings';
 
 
 function getData(ticker) {
     var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open("POST", "http://127.0.0.1:8000/api/stocks/recentInfo/", false);
+    xmlHttp.open("POST", API_SERVER + "/api/stocks/recentInfo/", false);
     xmlHttp.setRequestHeader("Content-Type","application/json");
     xmlHttp.send(JSON.stringify({ ticker: ticker}));
     var json = JSON.parse(xmlHttp.responseText);

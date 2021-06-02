@@ -10,6 +10,7 @@ import {
     ChartValueAxisItem
   } from '@progress/kendo-react-charts';
 import {formatDate} from '../data/appData';
+import { API_SERVER } from '../settings';
 
 const tempPlotBands = [{
     from: 80, to: 100, color: 'blue', opacity: 1
@@ -37,7 +38,7 @@ const tooltipRender = ({ point }) => {
 function getData(ticker, date){
     var xmlHttp = new XMLHttpRequest();
     
-    xmlHttp.open("POST", "http://127.0.0.1:8000/api/predict/", false);
+    xmlHttp.open("POST", API_SERVER + "/api/predict/", false);
     xmlHttp.setRequestHeader("Content-Type","application/json");
     xmlHttp.send( JSON.stringify({ticker: ticker, date: date}));
     

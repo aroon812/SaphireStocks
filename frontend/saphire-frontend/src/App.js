@@ -15,6 +15,7 @@ import { MyStocksContainer } from './components/MyStocksContainer';
 import { SearchInput } from './components/SearchInput'
 import { SignInInput } from './components/SignInInput';
 import { RegistrationInput } from './components/RegistrationInput';
+import { API_SERVER } from './settings';
 
 import '@progress/kendo-theme-material/dist/all.css';
 import './App.css';
@@ -24,7 +25,7 @@ import { TabsContainer } from './components/TabsContainer';
 
 function getName(symbol) {
   var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", 'http://127.0.0.1:8000/api/companies/' + symbol + '/', false); // false for synchronous request
+    xmlHttp.open( "GET", API_SERVER + '/api/companies/' + symbol + '/', false); // false for synchronous request
     xmlHttp.setRequestHeader("Content-Type","application/json");
     xmlHttp.send(JSON.stringify({ symbol: symbol }));
    

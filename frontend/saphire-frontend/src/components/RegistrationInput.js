@@ -2,6 +2,7 @@ import React from "react";
 import { Dialog, DialogActionsBar } from '@progress/kendo-react-dialogs';
 import { Input } from '@progress/kendo-react-inputs'; 
 import { Button} from '@progress/kendo-react-buttons';
+import { API_SERVER } from "../settings";
 
 
 const validEmailRegex = RegExp(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
@@ -83,13 +84,13 @@ export class RegistrationInput extends React.Component{
       var email = this.state.email.toLowerCase();
       console.info('Valid Form');
       var xmlHttp = new XMLHttpRequest();
-      xmlHttp.open( "POST", 'http://127.0.0.1:8000/api/users/', false); // false for synchronous request
+      xmlHttp.open( "POST", API_SERVER + '/api/users/', false); // false for synchronous request
       xmlHttp.setRequestHeader("Content-Type","application/json");
       xmlHttp.send(JSON.stringify({ email: email, password: this.state.password, first_name: this.state.fName, last_name: this.state.lName }));
       
 
       if (xmlHttp.status===200){
-        xmlHttp.open( "POST", 'http://127.0.0.1:8000/api/api-token-auth/', false); // false for synchronous request
+        xmlHttp.open( "POST", API_SERVER + '/api/api-token-auth/', false); // false for synchronous request
         xmlHttp.setRequestHeader("Content-Type","application/json");
         xmlHttp.send(JSON.stringify({ username: this.state.email, password: this.state.password }));
 

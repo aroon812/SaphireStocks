@@ -1,14 +1,28 @@
-FROM node:13.12.0-alpine
+#builder
+FROM node:12.18.3-alpine3.9 as builder
 
-WORKDIR /saphire-frontend
+WORKDIR /usr/src/app
 
-ENV PATH /saphire-frontend/node_modules/.bin:$PATH
+COPY ./saphire-frontend/package.json .
+RUN apk add --no-cache --virtual .gyp \
+        python \
+        make \
+        g++ \
+    && npm install \
+    && apk del .gyp
 
-COPY package.json ./
-COPY package-lock.json ./
-RUN yarn install --silent
-RUN yarn global add react-scripts@3.4.1 --silent
+COPY ./saphire-frontend .
 
-COPY . ./
+ARG API_SERVER
+ENV REACT_APP_API_SERVER=${API_SERVER}
+RUN REACT_APP_API_SERVER=${API_SERVER} \
+    npm run build 
 
-#CMD ["yarn", "start"]
+#final
+FROM node:12.18.3-alpine3.9
+
+WORKDIR /usr/src/app
+
+RUN npm install -g serve
+
+COPY --from=builder /usr/src/app/build ./build
