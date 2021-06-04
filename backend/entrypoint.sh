@@ -10,7 +10,7 @@ then
     echo "PostgreSQL started"
 fi
 
-python manage.py collectstatic --nooutput
+python manage.py collectstatic --noinput
 python manage.py migrate --noinput
 echo "from django.contrib.auth import get_user_model;
 get_user_model().objects.filter(email='$DJANGO_ADMIN_EMAIL').delete();
