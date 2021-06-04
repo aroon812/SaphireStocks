@@ -126,13 +126,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, '..','saphire-frontend', "build", "static"),  # production build
-)
-
-CORS_ORIGIN_ALLOW_ALL = True # added to solve CORS
 
 AUTH_USER_MODEL = 'api.User'
+
+try:
+    from .local_settings import *
+except ImportError:
+    pass
 
 """
 CELERY_IMPORTS = ['api.tasks']
