@@ -1,19 +1,14 @@
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.views import APIView
-from .models import Stock as SaphireStock, StockChange as SaphireStockChange, Company as SaphireCompany
-from django.contrib.auth import get_user_model, authenticate, update_session_auth_hash
-from .serializers import StockSerializer, StockChangeSerializer, UserSerializer, CompanySerializer
-from rest_framework.renderers import JSONRenderer
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
-from alpha_vantage.timeseries import TimeSeries
+from .models import Stock as SaphireStock, Company as SaphireCompany
+from .serializers import StockSerializer, CompanySerializer
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from datetime import datetime, timedelta
 from rest_framework.decorators import authentication_classes, permission_classes, api_view
-from .utils import update_historical_stocks, current_day_info, update_stock
+from .utils import current_day_info
 import json
-from django.db.models import Q, Max
+from django.db.models import Q
 from rest_framework.authentication import TokenAuthentication
-
 
 class StockList(APIView):
     def get(self, request, format=None):
@@ -33,25 +28,6 @@ class StockList(APIView):
             return Response(serializer.data, 200)
         print(serializer.errors)
         return Response({}, 400)
-
-
-class StockChangeList(APIView):
-    def get(self, request, format=None):
-        stock_changes = SaphireStockChange.objects.all()
-        serializer = StockChangeSerializer(stock_changes, many=True)
-        json_str = json.dumps(serializer.data, ensure_ascii=False)
-        loadedJson = json.loads(json_str)
-        return Response(loadedJson, 200)
-
-    def post(self, request, format='json'):
-        data = request.data
-        serializer = StockChangeSerializer(data=data)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, 200)
-        return Response({'error': serializer.errors}, 400)
-
 
 class CompanyList(APIView):
     def get(self, request, format=None):
@@ -181,118 +157,6 @@ def stock_range(request, format="json"):
             print(e)
             return Response({'error': str(e)}, 400)
 
-
-class StockChange(APIView):
-    permission_classes = (AllowAny,)
-
-    def get(self, request, pk, format=None):
-        stock_change = SaphireStockChange.objects.get(pk=pk)
-        serializer = StockChangeSerializer(stock_change)
-        json_str = json.dumps(serializer.data, ensure_ascii=False)
-        loadedJson = json.loads(json_str)
-        return Response(loadedJson, 200)
-
-    def put(self, request, pk, format="json"):
-        stock_change = SaphireStockChange.objects.get(pk=pk)
-        serializer = StockChangeSerializer(stock_change, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, 200)
-        return Response({'error': serializer.errors}, 400)
-
-    def patch(self, request, pk, format="json"):
-        stock_change = SaphireStockChange.objects.get(pk=pk)
-        serializer = StockChangeSerializer(
-            stock_change, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, 200)
-        return Response({'error': serializer.errors}, 400)
-
-    def delete(self, request, pk, format=None):
-        try:
-            stock_change = SaphireStockChange.objects.get(pk=pk)
-            stock_change.delete()
-            return Response({}, 204)
-        except Exception as e:
-            return Response({'error': str(e)}, 400)
-
-
-class UserList(APIView):
-    permission_classes = (AllowAny,)
-
-    def get(self, request, format=None):
-        users = get_user_model().objects.all()
-        serializer = UserSerializer(users, many=True)
-        json_str = json.dumps(serializer.data, ensure_ascii=False)
-        loadedJson = json.loads(json_str)
-        return Response(loadedJson, 200)
-
-    def post(self, request, format='json'):
-        data = request.data
-
-        if not get_user_model().objects.filter(email=data.get("email")).exists():
-            user = get_user_model().objects._create_user(email=data.get("email"), password=data.get("password"),
-                                                         username=data.get("email"), first_name=data.get("first_name"), last_name=data.get("last_name"))
-            if user is not None:
-                user.save()
-                return Response({}, 200)
-            else:
-                return Response({'error': 'User was not saved.'}, 400)
-        else:
-            return Response({'message': 'The provided email address is already in use.'}, 409)
-
-
-class User(APIView):
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, request, pk, format=None):
-        user = get_user_model().objects.get(pk=pk)
-        serializer = UserSerializer(user)
-        json_str = json.dumps(serializer.data, ensure_ascii=False)
-        loadedJson = json.loads(json_str)
-        return Response(loadedJson, 200)
-
-    def put(self, request, pk, format="json"):
-        user = get_user_model().objects.get(pk=pk)
-        update_session_auth_hash(request, user)
-        serializer = UserSerializer(user, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, 200)
-        return Response({'error': serializer.errors}, 400)
-
-    def patch(self, request, pk, format="json"):
-        user = get_user_model().objects.get(pk=pk)
-        serializer = UserSerializer(user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, 200)
-        return Response({'error': serializer.errors}, 400)
-
-    def delete(self, request, pk, format=None):
-        try:
-            user = get_user_model().objects.get(pk=pk)
-            user.delete()
-            return Response({}, 204)
-        except Exception as e:
-            return Response({'error': str(e)}, 400)
-
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-@api_view(['POST'])
-def change_password(request, pk, format="json"):
-    if request.method == 'POST':
-        password = request.data.get("password")
-        try:
-            user = get_user_model().objects.get(pk=pk)
-            user.set_password(password)
-            user.save()
-            return Response({}, 200)
-        except Exception as e:
-            return Response({'error': str(e)}, 400)
-
-
 class WatchStock(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -351,61 +215,7 @@ class GetWatchedStocks(APIView):
         except Exception as e:
             print(e)
             return Response({'error': str(e)}, 400)
-
-"""
-@api_view(['POST'])
-@authentication_classes([])
-@permission_classes([])
-def predict(request, format="json"):
-    if request.method == 'POST':
-        ticker = request.data.get("ticker")
-        date = request.data.get("date")
-        try:
-            key = '23V86RX6LO5AUIX4'
-            ts = TimeSeries(key)
-            stocks = SaphireStock.objects.filter(company=ticker)
-            stock, meta = ts.get_intraday(symbol=ticker, interval='1min')
-            recent = list(stock)[0]
-
-            recent_date = stocks.aggregate(Max('date'))
-            date_str = recent_date['date__max']
-            close = float(stock[recent]['4. close'])
-
-            stocks = SaphireStock.objects.filter(company=ticker)
-            date_str = recent_date['date__max']
-            prev_stock = SaphireStock.objects.get(
-                company=ticker, date=date_str)
-            predictions = predictStock(ticker, date)
-            percentage_change = predictions[0]
-            projected_price = (percentage_change+1)*float(prev_stock.close)
-            if percentage_change < 0:
-                directional_prediction = '-'
-            else:
-                directional_prediction = '+'
-
-            if predictions[1][0] == 0:
-                five_day_boom = 'False'
-            else:
-                five_day_boom = 'True'
-
-            five_day_boom_confidence = predictions[1][1]
-            predict_dict = {
-                'last_day_close': float(prev_stock.close),
-                'current_price': close,
-                'percentage_change': percentage_change*100,
-                'projected_price': projected_price,
-                'directional_prediction': directional_prediction,
-                'five_day_boom': five_day_boom,
-                'five_day_boom_confidence': five_day_boom_confidence
-            }
-
-            json_str = json.dumps(predict_dict, ensure_ascii=False)
-            loadedJson = json.loads(json_str)
-            return Response(loadedJson, 200)
-        except Exception as e:
-            print(e)
-            return Response({'error': str(e)}, 400)
-"""
+            
 
 @api_view(['POST'])
 @authentication_classes([])
