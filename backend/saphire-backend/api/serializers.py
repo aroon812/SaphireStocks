@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Stock, StockChange, Company
+from .models import Stock, Company
 from .stockUtils import fillStockFields
 
 
@@ -42,12 +42,4 @@ class StockSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Stock
-        fields = '__all__'
-
-
-class StockChangeSerializer(serializers.ModelSerializer):
-    stock = serializers.PrimaryKeyRelatedField(queryset=Stock.objects.all())
-
-    class Meta:
-        model = StockChange
         fields = '__all__'

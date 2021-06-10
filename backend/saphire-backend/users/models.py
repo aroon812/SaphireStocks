@@ -40,7 +40,7 @@ class User(AbstractUser):
     A user object which is a modified version of the base Django user.
     """
     watchedStocks = models.ManyToManyField(
-        'Company', blank=True, related_name='watchedBy')
+        'api.Company', blank=True, related_name='watchedBy')
     email = models.EmailField(unique=True)
     REQUIRED_FIELDS = []
     USERNAME_FIELD = 'email'
