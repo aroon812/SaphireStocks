@@ -8,9 +8,13 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
-
+import { authLogin, authFail } from '../store/authActions';
 import { connect } from 'react-redux';
+
 import * as actions from '../store/authActions';
+import axios from 'axios';
+
+import * as settings from '../settings';
 
 import { useHistory, useLocation } from "react-router-dom";
 
@@ -34,30 +38,37 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function Login(props) {
+function CreateAccount(props) {
   const classes = useStyles();
   const [username, setuserName] = React.useState(null);
   const [password, setPassword] = React.useState(null);
+  const [password_confirmation, setPasswordConfirmation] = React.useState(null);
 
   let history = useHistory();
   let location = useLocation();
   let { from } = location.state || { from: { pathname: "/"} };
 
-  React.useEffect(() => {
-    if (props.isAuthenticated) { history.replace(from) };
-  });
-
   const handleFormFieldChange = (event) => {
     switch (event.target.id) {
       case 'username': setuserName(event.target.value); break;
       case 'password': setPassword(event.target.value); break;
+      case 'password_confirmation': setPasswordConfirmation(event.target.value); break;
       default: return null;
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    props.onAuth(username, password);
+    axios.post(`${settings.API_SERVER}/api/auth/users/`, {
+        email: username,
+        password: password
+    })
+    .then(res => {
+        history.push('/login/') 
+    })
+    .catch(err => {
+        alert(err.response.data.message);
+    });
   }
 
   return (
@@ -68,7 +79,7 @@ function Login(props) {
           <LockOutlinedIcon />
         </Avatar>
         <Typography component="h1" variant="h5">
-          Sign in
+          Create Account
         </Typography>
         <form className={classes.form} noValidate onSubmit={handleSubmit}>
           <TextField
@@ -77,7 +88,7 @@ function Login(props) {
             required
             fullWidth
             id="username"
-            label="Username"
+            label="Email"
             name="username"
             autoComplete="username"
             autoFocus
@@ -95,6 +106,19 @@ function Login(props) {
             autoComplete="current-password"
             onChange={handleFormFieldChange}
           />
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            name="password_confirmation"
+            label="Enter Your Password Again"
+            type="password"
+            id="password_confirmation"
+            onChange={handleFormFieldChange}
+            error={password !== password_confirmation}
+            helperText={password !== password_confirmation ? "Passwords don't match" : null}
+          />
           <Button
             type="submit"
             fullWidth
@@ -102,21 +126,12 @@ function Login(props) {
             color="primary"
             className={classes.submit}
           >
-            Sign In
+            Create Account
           </Button>
-          <a href="/create_account/">
-            No Account? Create One!
-          </a>
         </form>
       </div>
     </Container>
   );
 }
 
-const mapDispatchToProps = dispatch => {
-  return {
-    onAuth: (username, password) => dispatch(actions.authLogin(username, password))
-  }
-}
-
-export default connect(null, mapDispatchToProps)(Login);
+export default CreateAccount;

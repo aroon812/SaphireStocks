@@ -22,7 +22,7 @@ class UserList(APIView):
 
         if not get_user_model().objects.filter(email=data.get("email")).exists():
             user = get_user_model().objects._create_user(email=data.get("email"), password=data.get("password"),
-                                                         username=data.get("email"), first_name=data.get("first_name"), last_name=data.get("last_name"))
+                                                         username=data.get("email"))
             if user is not None:
                 user.save()
                 return Response({}, 200)
@@ -30,7 +30,6 @@ class UserList(APIView):
                 return Response({'error': 'User was not saved.'}, 400)
         else:
             return Response({'message': 'The provided email address is already in use.'}, 409)
-
 
 class User(APIView):
     permission_classes = (IsAuthenticated,)
