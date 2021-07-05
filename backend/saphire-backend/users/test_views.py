@@ -3,7 +3,6 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from django.test import TestCase, Client
 from django.urls import reverse 
-from .models import User 
 from .serializers import UserSerializer
 from django.contrib.auth import get_user_model
 
