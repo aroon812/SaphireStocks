@@ -1,3 +1,4 @@
+from functools import partial
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model, update_session_auth_hash
@@ -72,7 +73,26 @@ class CurrentUser(APIView):
             loadedJson = json.loads(json_str)
             return Response(loadedJson, status.HTTP_200_OK)
         except Exception as e:
-            return Response({'error': str(e)}, 404)
+            return Response({'error': str(e)}, status.HTTP_404_NOT_FOUND)
+
+    def put(self, request, format="json"):
+        user = request.user
+        serializer = UserSerializer(user, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status.HTTP_204_NO_CONTENT)
+        return Response({'error': serializer.errors}, status.HTTP_400_BAD_REQUEST)
+    
+    def patch(self, request, format="json"):
+        user = request.user
+        serializer = UserSerializer(user, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status.HTTP_204_NO_CONTENT)
+        return Response({'error': serializer.errors}, status.HTTP_400_BAD_REQUEST)
+
 
 class APILogoutView(LogoutView):
     authentication_classes = [TokenAuthentication]
