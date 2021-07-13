@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 from alpha_vantage.timeseries import TimeSeries
 import statistics
 import pandas
-from .models import Stock, StockChange, Company
+from .models import Stock, Company
 from .serializers import StockSerializer
 from django.db.models import Max, Min
 from datetime import datetime, timedelta

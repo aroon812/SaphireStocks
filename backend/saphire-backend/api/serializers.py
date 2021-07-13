@@ -1,7 +1,6 @@
 from rest_framework import serializers
-from .models import User, Stock, StockChange, Company
-from django.contrib.auth import get_user_model
-from .stockUtils import fillStockFields, normalize_stock
+from .models import Stock, Company
+from .stockUtils import fillStockFields
 
 
 class StockField(serializers.Field):
@@ -43,29 +42,4 @@ class StockSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Stock
-        fields = '__all__'
-
-
-class UserSerializer(serializers.ModelSerializer):
-    watchedStocks = CompanySerializer(many=True, read_only=True)
-
-    def create(self, validated_data):
-        user = get_user_model().objects.create(
-            username=validated_data['username']
-        )
-        user.set_password(validated_data['password'])
-        user.save()
-
-        return user
-
-    class Meta:
-        model = User
-        fields = '__all__'
-
-
-class StockChangeSerializer(serializers.ModelSerializer):
-    stock = serializers.PrimaryKeyRelatedField(queryset=Stock.objects.all())
-
-    class Meta:
-        model = StockChange
         fields = '__all__'

@@ -33,17 +33,14 @@ if DJANGO_ENV == 'development' or DJANGO_ENV == 'production':
         }
     }
 else:
+    SITE_URL = "http://127.0.0.1:8000"
     SECRET_KEY = 'localsecret'
     DEBUG = True 
     ALLOWED_HOSTS = ['127.0.0.1', '0.0.0.0', 'localhost']
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'predictiondb',
-            'USER': 'aaronthompson',
-            #'PASSWORD': 'postgres_password',
-            'HOST': '127.0.0.1',
-            'PORT': '5432',
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'localdb.sqlite3',
         }
     }
 
